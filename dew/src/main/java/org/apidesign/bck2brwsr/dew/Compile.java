@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
 import javax.tools.FileObject;
@@ -53,8 +55,8 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     private final String html;
 
     private Compile(String html, String code) throws IOException {
-        this.pkg = find("package", ';', code);
-        this.cls = find("class", ' ', code);
+        this.pkg = findPkg(code);
+        this.cls = findCls(code);
         this.html = html;
         classes = compile(html, code);
     }
@@ -118,20 +120,23 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
         errors.add(diagnostic);
     }
-    private static String find(String pref, char term, String java) throws IOException {
-        int pkg = java.indexOf(pref);
-        if (pkg != -1) {
-            pkg += pref.length();
-            while (Character.isWhitespace(java.charAt(pkg))) {
-                pkg++;
-            }
-            int semicolon = java.indexOf(term, pkg);
-            if (semicolon != -1) {
-                String pkgName = java.substring(pkg, semicolon).trim();
-                return pkgName;
-            }
+    private static String findPkg(String java) throws IOException {
+        Pattern p = Pattern.compile("package\\p{javaWhitespace}*([\\p{Alnum}\\.]+)\\p{javaWhitespace}*;", Pattern.MULTILINE);
+        Matcher m = p.matcher(java);
+        if (!m.find()) {
+            throw new IOException("Can't find package declaration in the java file");
         }
-        throw new IOException("Can't find " + pref + " declaration in the java file");
+        String pkg = m.group(1);
+        return pkg;
+    }
+    private static String findCls(String java) throws IOException {
+        Pattern p = Pattern.compile("class\\p{javaWhitespace}*([\\p{Alnum}\\.]+)\\p{javaWhitespace}", Pattern.MULTILINE);
+        Matcher m = p.matcher(java);
+        if (!m.find()) {
+            throw new IOException("Can't find package declaration in the java file");
+        }
+        String cls = m.group(1);
+        return cls;
     }
 
     String getHtml() {
