@@ -18,9 +18,12 @@
 
 package cz.xelfi.test.javac;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -202,47 +205,79 @@ public class ClassLoaderFileManager implements JavaFileManager {
 //        return result;
 //    }
 
-    //MOCK IMPL
     private List<String> getResources(String folder) throws IOException {
         if (classPathContent == null) {
             classPathContent = new HashMap<>();
-//            final String boot = System.getProperty("sun.boot.class.path");  //NOI18N
-            final String cp = System.getProperty("java.class.path");
-            for (String entry : cp.split(File.pathSeparator)) {
-                File f = new File (entry);
-                if (f.canRead()) {
-                    if (f.isFile()) {
-                        ZipFile zf = new ZipFile(f);
-                        try {
-                            Enumeration<? extends ZipEntry> entries = zf.entries();
-                            while (entries.hasMoreElements()) {
-                                ZipEntry e = entries.nextElement();
-                                if (e.isDirectory()) {
-                                    continue;
-                                }
-                                final String name = String.format("/%s",e.getName());
-                                final String owner = getOwner(name);
-                                List<String> content = classPathContent.get(owner);
-                                if (content == null) {
-                                    content = new ArrayList<>();
-                                    classPathContent.put(owner, content);
-                                }
-                                content.add(name);
-                            }
-                        } finally {
-                            zf.close();
-                        }
-                    } else if (f.isDirectory()) {
-                        addFiles(f,"/", classPathContent);
-                    }
-                }
-            }                                    
         }
         List<String> content = classPathContent.get(folder);
+        if (content == null) {
+            List<String> arr = new ArrayList<>();
+            classPathContent.put(folder, arr);
+            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg-" + folder.replace('/', '.'));
+            if (in != null) {
+                BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                for (;;) {
+                    String l = r.readLine();
+                    if (l == null) {
+                        break;
+                    }
+                    arr.add(l);
+                }
+            }
+        }
         return content == null ? Collections.<String>emptyList() : content;
     }
+    
+    public static void main(String... args) throws Exception {
+        File dir = new File(args[0]);
+        assert dir.isDirectory() : "Should be a directory " + dir;
+        
+        Map<String,List<String>> cntent = new HashMap<>();
+        
+        final String cp = System.getProperty("java.class.path");
+        for (String entry : cp.split(File.pathSeparator)) {
+            File f = new File(entry);
+            if (f.canRead()) {
+                if (f.isFile()) {
+                    ZipFile zf = new ZipFile(f);
+                    try {
+                        Enumeration<? extends ZipEntry> entries = zf.entries();
+                        while (entries.hasMoreElements()) {
+                            ZipEntry e = entries.nextElement();
+                            if (e.isDirectory()) {
+                                continue;
+                            }
+                            final String name = String.format("/%s", e.getName());
+                            final String owner = getOwner(name);
+                            List<String> content = cntent.get(owner);
+                            if (content == null) {
+                                content = new ArrayList<>();
+                                cntent.put(owner, content);
+                            }
+                            content.add(name);
+                        }
+                    } finally {
+                        zf.close();
+                    }
+                } else if (f.isDirectory()) {
+                    addFiles(f, "/", cntent);
+                }
+            }
+        }
+        
+        for (Map.Entry<String, List<String>> en : cntent.entrySet()) {
+            String pkg = en.getKey();
+            List<String> classes = en.getValue();
+            File f = new File(dir, "pkg-" + pkg.replace('/', '.'));
+            FileWriter w = new FileWriter(f);
+            for (String c : classes) {
+                w.append(c).append("\n");
+            }
+            w.close();
+        }
+    }
 
-    private void addFiles(File folder, String path, Map<String,List<String>> into) {
+    private static void addFiles(File folder, String path, Map<String,List<String>> into) {
         for (File f : folder.listFiles()) {
             String fname = path + (path.length() == 1 ? "" : "/") +  f.getName();
             if (f.isDirectory()) {
@@ -251,7 +286,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                 List<String> content = into.get(path);
                 if (content == null) {
                     content = new ArrayList<>();
-                    classPathContent.put(path, content);
+                    into.put(path, content);
                 }
                 content.add(fname);
             }

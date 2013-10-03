@@ -103,6 +103,30 @@
                   <skip>true</skip>
               </configuration>
           </plugin>      
+          <plugin>
+             <groupId>org.codehaus.mojo</groupId>
+             <artifactId>exec-maven-plugin</artifactId>
+             <version>1.2.1</version>
+             <executions>
+                 <execution>
+                     <id>generate-packages</id>
+                     <phase>process-test-classes</phase>
+                     <configuration>
+                         <executable>java</executable>
+                        <arguments>
+                            <argument>-Dskip.if.exists=true</argument>
+                            <argument>-cp</argument>
+                            <classpath />
+                            <argument>cz.xelfi.test.javac.ClassLoaderFileManager</argument>
+                            <argument>${project.build.directory}/test-classes/cz/xelfi/test/javac/</argument>
+                        </arguments>
+                     </configuration>
+                     <goals>
+                         <goal>exec</goal>
+                     </goals>
+                 </execution>
+             </executions>
+         </plugin>
       </plugins>
   </build>
 
@@ -209,7 +233,9 @@
                       <artifactId>maven-compiler-plugin</artifactId>
                       <configuration>
                           <compilerArguments>
+                              <!--
                               <bootclasspath>netbeans.ignore.jdk.bootclasspath</bootclasspath>
+                              -->
                           </compilerArguments>
                       </configuration>
                   </plugin>

@@ -28,20 +28,14 @@ import org.testng.annotations.Factory;
  */
 public class CompileTest  {
     @Compare public void testCompile() throws IOException {
-        String html = "<html><body>"
-                + " <button id='btn'>Hello!</button>"
-                + "</body></html>";
+        String html = "";
         String java = "package x.y.z;"
-                + "import org.apidesign.bck2brwsr.htmlpage.api.*;"
-                + "import static org.apidesign.bck2brwsr.htmlpage.api.OnEvent.*;"
-            + "@Page(xhtml=\"index.html\", className=\"Index\")"
             + "class X { "
-            + "   @On(event=CLICK, id=\"btn\") static void clcs() {}"
+            + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }"
             + "}";
         Compile result = Compile.create(html, java);
 
         assertNotNull(result.get("x/y/z/X.class"), "Class X is compiled: " + result);
-        assertNotNull(result.get("x/y/z/Index.class"), "Class Index is compiled: " + result);
     }
     
     @Factory public static Object[] create() {
