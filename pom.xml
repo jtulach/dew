@@ -79,6 +79,7 @@
               <configuration>
                   <systemPropertyVariables>
                       <vmtest.brwsrs>${brwsr}</vmtest.brwsrs>
+                      <vmtest.js>brwsr</vmtest.js>
                   </systemPropertyVariables>
               </configuration>
           </plugin>
@@ -226,9 +227,6 @@
                   <value>bck2brwsr</value>
               </property>
           </activation>
-          <properties>
-              <vmtest.js>brwsr</vmtest.js>
-          </properties>
           <build>
               <plugins>
                   <plugin>
