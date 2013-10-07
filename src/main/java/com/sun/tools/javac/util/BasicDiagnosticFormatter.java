@@ -31,7 +31,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.util.AbstractDiagnosticFormatter.SimpleConfiguration;
@@ -138,10 +137,12 @@ public class BasicDiagnosticFormatter extends AbstractDiagnosticFormatter {
             int indentSource = conf.getIndentation(DiagnosticPart.SOURCE);
             String sourceLine = "\n" + formatSourceLine(d, indentSource);
             boolean singleLine = msg.indexOf("\n") == -1;
-            if (singleLine || getConfiguration().getSourcePosition() == SourcePosition.BOTTOM)
                 return msg + sourceLine;
+                /*
+            if (singleLine || getConfiguration().getSourcePosition() == SourcePosition.BOTTOM)
             else
                 return msg.replaceFirst("\n", Matcher.quoteReplacement(sourceLine) + "\n");
+                */
         }
     }
 

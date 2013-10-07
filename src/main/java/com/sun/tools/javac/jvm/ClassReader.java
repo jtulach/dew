@@ -28,7 +28,6 @@ package com.sun.tools.javac.jvm;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -60,6 +59,7 @@ import static com.sun.tools.javac.jvm.ClassFile.*;
 import static com.sun.tools.javac.jvm.ClassFile.Version.*;
 
 import static com.sun.tools.javac.main.Option.*;
+import java.nio.CharBuffer;
 
 /** This class provides operations to read a classfile into an internal
  *  representation. The internal representation is anchored in a

@@ -1697,7 +1697,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
     }
 
     public static void enableLogging() {
-        Logger logger = Logger.getLogger(com.sun.tools.javac.Main.class.getPackage().getName());
+        Logger logger = Logger.getLogger("com.sun.tools.javac");
         logger.setLevel(Level.ALL);
         for (Handler h : logger.getParent().getHandlers()) {
             h.setLevel(Level.ALL);

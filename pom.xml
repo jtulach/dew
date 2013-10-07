@@ -226,6 +226,9 @@
                   <value>bck2brwsr</value>
               </property>
           </activation>
+          <properties>
+              <vmtest.js>brwsr</vmtest.js>
+          </properties>
           <build>
               <plugins>
                   <plugin>
@@ -265,6 +268,12 @@
                   <artifactId>emul</artifactId>
                   <version>${bck2brwsr.version}</version>
                   <classifier>rt</classifier>
+              </dependency>
+              <dependency>
+                  <groupId>org.apidesign.bck2brwsr</groupId>
+                  <artifactId>emul</artifactId>
+                  <version>${bck2brwsr.version}</version>
+                  <scope>test</scope>
               </dependency>
               <dependency>
                   <groupId>org.apidesign.bck2brwsr</groupId>

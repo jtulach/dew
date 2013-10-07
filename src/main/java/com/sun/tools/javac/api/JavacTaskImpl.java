@@ -27,7 +27,6 @@ package com.sun.tools.javac.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.CharBuffer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -504,7 +503,6 @@ public class JavacTaskImpl extends BasicJavacTask {
     /**
      * For internal use only.  This method will be
      * removed without warning.
-     */
     public Type parseType(String expr, TypeElement scope) {
         if (expr == null || expr.equals(""))
             throw new IllegalArgumentException();
@@ -521,5 +519,6 @@ public class JavacTaskImpl extends BasicJavacTask {
             compiler.log.useSource(prev);
         }
     }
+     */
 
 }

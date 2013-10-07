@@ -27,7 +27,6 @@ package javax.tools;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.CharBuffer;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileObject.Kind;
@@ -113,11 +112,13 @@ public class SimpleJavaFileObject implements JavaFileObject {
         CharSequence charContent = getCharContent(ignoreEncodingErrors);
         if (charContent == null)
             throw new UnsupportedOperationException();
+        /*
         if (charContent instanceof CharBuffer) {
             CharBuffer buffer = (CharBuffer)charContent;
             if (buffer.hasArray())
                 return new CharArrayReader(buffer.array());
         }
+        */
         return new StringReader(charContent.toString());
     }
 

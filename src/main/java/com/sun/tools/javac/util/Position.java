@@ -25,7 +25,6 @@
 
 package com.sun.tools.javac.util;
 
-import java.util.BitSet;
 import static com.sun.tools.javac.util.LayoutCharacters.*;
 
 /** A class that defines source code positions as simple character
@@ -72,8 +71,8 @@ public class Position {
      * @param   expandTabs  If true, expand tabs when calculating columns
      */
     public static LineMap makeLineMap(char[] src, int max, boolean expandTabs) {
-        LineMapImpl lineMap = expandTabs ?
-            new LineTabMapImpl(max) : new LineMapImpl();
+        LineMapImpl lineMap = /*expandTabs ?
+            new LineTabMapImpl(max) :*/ new LineMapImpl();
         lineMap.build(src, max);
         return lineMap;
     }
@@ -240,7 +239,6 @@ public class Position {
     /**
      * A LineMap that handles tab expansion correctly.  The cost is
      * an additional bit per character in the source array.
-     */
     public static class LineTabMapImpl extends LineMapImpl {
         private BitSet tabMap;       // bits set for tab positions.
 
@@ -279,4 +277,5 @@ public class Position {
             return pos;
         }
     }
+     */
 }

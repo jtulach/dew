@@ -284,7 +284,7 @@ public interface JavaCompiler extends Tool, OptionChecker {
     StandardJavaFileManager getStandardFileManager(
         DiagnosticListener<? super JavaFileObject> diagnosticListener,
         Locale locale,
-        Charset charset);
+            Charset charset);
 
     /**
      * Interface representing a future for a compilation task.  The

@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import com.sun.tools.classfile.Dependency.Filter;
 import com.sun.tools.classfile.Dependency.Finder;
@@ -176,9 +175,9 @@ public class Dependencies {
      * @param pattern the pattern used to match the target's class name
      * @return a filter for matching the target class name with a regular expression
      */
-    public static Filter getRegexFilter(Pattern pattern) {
-        return new TargetRegexFilter(pattern);
-    }
+//    public static Filter getRegexFilter(Pattern pattern) {
+//        return new TargetRegexFilter(pattern);
+//    }
 
     /**
      * Get a filter which checks the package of a target's class name
@@ -400,21 +399,6 @@ public class Dependencies {
         }
     }
 
-    /**
-     * This class accepts those dependencies whose target's class name matches a
-     * regular expression.
-     */
-    static class TargetRegexFilter implements Filter {
-        TargetRegexFilter(Pattern pattern) {
-            this.pattern = pattern;
-        }
-
-        public boolean accepts(Dependency dependency) {
-            return pattern.matcher(dependency.getTarget().getClassName()).matches();
-        }
-
-        private final Pattern pattern;
-    }
 
     /**
      * This class accepts those dependencies whose class name is in a given

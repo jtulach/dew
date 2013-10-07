@@ -25,7 +25,6 @@
 
 package com.sun.javadoc;
 
-import java.text.BreakIterator;
 import java.util.Locale;
 
 /**

@@ -33,15 +33,6 @@ import java.io.OutputStreamWriter;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,6 +49,14 @@ import com.sun.tools.javac.main.Option;
 import com.sun.tools.javac.main.OptionHelper;
 import com.sun.tools.javac.main.OptionHelper.GrumpyHelper;
 import com.sun.tools.javac.util.JCDiagnostic.SimpleDiagnosticPosition;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 
 /**
  * Utility methods for building a filemanager.
@@ -110,38 +109,7 @@ public abstract class BaseFileManager {
     }
 
     protected ClassLoader getClassLoader(URL[] urls) {
-        ClassLoader thisClassLoader = getClass().getClassLoader();
-
-        // Bug: 6558476
-        // Ideally, ClassLoader should be Closeable, but before JDK7 it is not.
-        // On older versions, try the following, to get a closeable classloader.
-
-        // 1: Allow client to specify the class to use via hidden option
-        if (classLoaderClass != null) {
-            try {
-                Class<? extends ClassLoader> loader =
-                        Class.forName(classLoaderClass).asSubclass(ClassLoader.class);
-                Class<?>[] constrArgTypes = { URL[].class, ClassLoader.class };
-                Constructor<? extends ClassLoader> constr = loader.getConstructor(constrArgTypes);
-                return constr.newInstance(new Object[] { urls, thisClassLoader });
-            } catch (Throwable t) {
-                // ignore errors loading user-provided class loader, fall through
-            }
-        }
-
-        // 2: If URLClassLoader implements Closeable, use that.
-        if (Closeable.class.isAssignableFrom(URLClassLoader.class))
-            return new URLClassLoader(urls, thisClassLoader);
-
-        // 3: Try using private reflection-based CloseableURLClassLoader
-        try {
-            return new CloseableURLClassLoader(urls, thisClassLoader);
-        } catch (Throwable t) {
-            // ignore errors loading workaround class loader, fall through
-        }
-
-        // 4: If all else fails, use plain old standard URLClassLoader
-        return new URLClassLoader(urls, thisClassLoader);
+        return getClass().getClassLoader();
     }
 
     // <editor-fold defaultstate="collapsed" desc="Option handling">

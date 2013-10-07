@@ -29,7 +29,6 @@ import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -81,10 +80,7 @@ public class ToolProvider {
                 }
             }
         } catch (SecurityException ex) {
-            System.err.format((Locale)null, "%s: %s; %s%n",
-                              ToolProvider.class.getName(),
-                              reason,
-                              ex.getLocalizedMessage());
+            ex.printStackTrace();
         }
         return null;
     }
@@ -174,30 +170,7 @@ public class ToolProvider {
         try {
             return Class.forName(toolClassName, false, null);
         } catch (ClassNotFoundException e) {
-            trace(FINE, e);
-
-            // if tool not on bootclasspath, look in default tools location (tools.jar)
-            ClassLoader cl = (refToolClassLoader == null ? null : refToolClassLoader.get());
-            if (cl == null) {
-                File file = new File(System.getProperty("java.home"));
-                if (file.getName().equalsIgnoreCase("jre"))
-                    file = file.getParentFile();
-                for (String name : defaultToolsLocation)
-                    file = new File(file, name);
-
-                // if tools not found, no point in trying a URLClassLoader
-                // so rethrow the original exception.
-                if (!file.exists())
-                    throw e;
-
-                URL[] urls = { file.toURI().toURL() };
-                trace(FINE, urls[0].toString());
-
-                cl = URLClassLoader.newInstance(urls);
-                refToolClassLoader = new WeakReference<ClassLoader>(cl);
-            }
-
-            return Class.forName(toolClassName, false, cl);
+            return Class.forName(toolClassName, false, null);
         }
     }
 }

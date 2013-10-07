@@ -81,10 +81,8 @@ public final class JavacTool implements JavaCompiler {
         return new JavacTool();
     }
 
-    public JavacFileManager getStandardFileManager(
-        DiagnosticListener<? super JavaFileObject> diagnosticListener,
-        Locale locale,
-        Charset charset) {
+    @Override
+    public StandardJavaFileManager getStandardFileManager(DiagnosticListener<? super JavaFileObject> diagnosticListener, Locale locale, Charset charset) {
         Context context = new Context();
         context.put(Locale.class, locale);
         if (diagnosticListener != null)

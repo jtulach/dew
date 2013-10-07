@@ -27,10 +27,8 @@ package com.sun.tools.javac.util;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-import java.nio.CharBuffer;
 import javax.tools.JavaFileObject;
 
-import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.tree.EndPosTable;
 
 import static com.sun.tools.javac.util.LayoutCharacters.*;
@@ -183,11 +181,11 @@ public class DiagnosticSource {
     protected char[] initBuf(JavaFileObject fileObject) throws IOException {
         char[] buf;
         CharSequence cs = fileObject.getCharContent(true);
-        if (cs instanceof CharBuffer) {
+/*        if (cs instanceof CharBuffer) {
             CharBuffer cb = (CharBuffer) cs;
             buf = JavacFileManager.toArray(cb);
             bufLen = cb.limit();
-        } else {
+        } else */ {
             buf = cs.toString().toCharArray();
             bufLen = buf.length;
         }
