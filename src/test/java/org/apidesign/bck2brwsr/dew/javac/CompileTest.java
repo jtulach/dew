@@ -15,25 +15,35 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
-package cz.xelfi.test.javac;
+package org.apidesign.bck2brwsr.dew.javac;
 
+import org.apidesign.bck2brwsr.dew.javac.Compile;
 import java.io.IOException;
-import org.testng.annotations.Test;
+import java.util.Arrays;
+import org.apidesign.bck2brwsr.vmtest.Compare;
+import org.apidesign.bck2brwsr.vmtest.VMTest;
+import org.testng.annotations.Factory;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class HotspotCompileTest  {
-    @Test public void testCompile() throws IOException {
+public class CompileTest  {
+    @Compare public String testCompile() throws IOException {
         String html = "";
         String java = "package x.y.z;"
             + "class X { "
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }"
             + "}";
         Compile result = Compile.create(html, java);
-
-        assertNotNull(result.get("x/y/z/X.class"), "Class X is compiled: " + result);
+        
+        final byte[] bytes = result.get("x/y/z/X.class");
+        assertNotNull(bytes, "Class X is compiled: " + result);
+        return Arrays.toString(bytes);
+    }
+    
+    @Factory public static Object[] create() {
+        return VMTest.create(CompileTest.class);
     }
     
     static void assertNotNull(Object obj, String msg) {

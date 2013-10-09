@@ -15,7 +15,7 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
-package cz.xelfi.test.javac;
+package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

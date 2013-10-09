@@ -29,7 +29,7 @@
   </dependencySets> 
   <fileSets>
       <fileSet>
-          <directory>${project.build.directory}/classes/cz/xelfi/test/javac/</directory>
+          <directory>${project.build.directory}/classes/org/apidesign/bck2brwsr/dew/javac/</directory>
           <includes>
               <include>**/*</include>
           </includes>

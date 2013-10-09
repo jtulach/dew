@@ -16,7 +16,7 @@
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
 
-package cz.xelfi.test.javac;
+package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.BufferedReader;
 import java.io.File;

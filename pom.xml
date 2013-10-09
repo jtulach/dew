@@ -3,12 +3,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>cz.xelfi.test</groupId>
-  <artifactId>javac</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <groupId>org.apidesign.bck2brwsr.demo</groupId>
+  <artifactId>dew-javac</artifactId>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>javac</name>
+  <name>Development Environment for Web with Javac</name>
 
   <repositories>
       <repository>
@@ -118,8 +118,8 @@
                             <argument>-Dskip.if.exists=true</argument>
                             <argument>-cp</argument>
                             <classpath />
-                            <argument>cz.xelfi.test.javac.ClassLoaderFileManager</argument>
-                            <argument>${project.build.directory}/test-classes/cz/xelfi/test/javac/</argument>
+                            <argument>org.apidesign.bck2brwsr.dew.javac.ClassLoaderFileManager</argument>
+                            <argument>${project.build.directory}/test-classes//org/apidesign/bck2brwsr/demo/dew/javac/</argument>
                         </arguments>
                      </configuration>
                      <goals>
