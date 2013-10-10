@@ -73,68 +73,11 @@ angular.module('bck2brwsr', []).
 
 function DevCtrl( $scope, $http ) {
     var templateHtml = 
-"<html><body>\n" +
-"  <input data-bind=\"value: value, valueUpdate: 'afterkeydown'\" \n" +
-"     value=\"0\" type=\"number\">\n" +
-"  </input>\n" +
-"  * <span data-bind=\"text: value\">0</span> \n" +
-"  = <span data-bind=\"text: powerValue\">0</span>\n" +
-"  <br/>\n" +
-"  <button id='dupl'>Duplicate!</button>\n" +
-"  <button id=\"clear\">Clear!</button>" +
-" <hr/>\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-" <script src=\"/bck2brwsr.js\"></script>\n" +
-" <script type=\"text/javascript\">\n" +
-"   function ldCls(res) {\n" +
-"     var request = new XMLHttpRequest();\n" +
-"     request.open('GET', '/classes/' + res, false);\n" +
-"     request.send();\n" +
-"     var arr = eval('(' + request.responseText + ')');\n" +
-"     return arr;\n" +
-"   }\n" +
-"   var vm = bck2brwsr(ldCls);\n" +
-"   vm.loadClass('${fqn}');\n" +
-" </script>\n" +
-"</body></html>";
+"<h1>Hello World!</h1>\n";
     var templateJava = 
 "package bck2brwsr.demo;\n" +
-"import org.apidesign.bck2brwsr.htmlpage.api.*;\n" +
-"import static org.apidesign.bck2brwsr.htmlpage.api.OnEvent.*;\n" +
-"\n" +
-"@Page(xhtml=\"index.html\", className=\"Index\", properties={\n" +
-"  @Property(name=\"value\", type=int.class)\n" +
-"})\n" +
 "class YourFirstHTML5PageInRealLanguage {\n" +
-"  static { new Index().applyBindings(); }\n" +
-"  @On(event=CLICK, id=\"dupl\") static void duplicateValue(Index m) {\n" +
-"    m.setValue(m.getValue() * 2);\n" +
-"  }\n" +
-"  @On(event=CLICK, id=\"clear\") static void zeroTheValue(Index m) {\n" +
-"     m.setValue(0);;\n" +
-"  }\n" +
-"  @ComputedProperty static int powerValue(int value) {\n" +
-"    return value * value;\n" +
-"  }\n" +
+"  static { throw new IllegalStateException(\"Running!\"); }\n" +
 "}";
 
     
@@ -191,11 +134,9 @@ function DevCtrl( $scope, $http ) {
     };
     
     $scope.post = function() {
-        return $http({url: ".",
-            method: "POST",
-            //headers: this.headers,
-            data: { html : $scope.html, java : $scope.java} 
-        }).success( $scope.reload ).error( $scope.fail );
+        console.log("Modified: " + $scope.java);
+        $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
+        console.log("Msg sent");
     };
     
     $scope.errorClass = function( kind ) {
@@ -216,9 +157,15 @@ function DevCtrl( $scope, $http ) {
     $scope.tab = "html";
     $scope.html= templateHtml;  
     $scope.java = templateJava;  
+    var w = new Worker('compiler.js', 'javac');
+    $scope.javac = w;
+//    var w = new SharedWorker('compiler.js', 'javac');
+//    $scope.javac = w.port;
+    $scope.javac.onmessage = function(ev) {
+        console.log('compiled ' + ev.data);
+    };
     
     $scope.$watch( "html", $scope.debounce( $scope.post, 2000 ) );
     $scope.$watch( "java", $scope.debounce( $scope.post, 2000 ) );
-    $scope.post();
-    
+
 }

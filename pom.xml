@@ -3,8 +3,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apidesign.bck2brwsr.demo</groupId>
-  <artifactId>dew-javac</artifactId>
+  <groupId>org.apidesign.bck2brwsr.dew</groupId>
+  <artifactId>dew4javac</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -111,7 +111,7 @@
              <executions>
                  <execution>
                      <id>generate-packages</id>
-                     <phase>process-test-classes</phase>
+                     <phase>process-classes</phase>
                      <configuration>
                          <executable>java</executable>
                         <arguments>
@@ -119,7 +119,7 @@
                             <argument>-cp</argument>
                             <classpath />
                             <argument>org.apidesign.bck2brwsr.dew.javac.ClassLoaderFileManager</argument>
-                            <argument>${project.build.directory}/test-classes//org/apidesign/bck2brwsr/demo/dew/javac/</argument>
+                            <argument>${project.build.directory}/classes/org/apidesign/bck2brwsr/dew/javac/</argument>
                         </arguments>
                      </configuration>
                      <goals>
@@ -153,6 +153,12 @@
     <dependency>
       <groupId>org.apidesign.html</groupId>
       <artifactId>net.java.html.json</artifactId>
+      <version>${net.java.html.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apidesign.html</groupId>
+      <artifactId>net.java.html.boot</artifactId>
       <version>${net.java.html.version}</version>
       <type>jar</type>
     </dependency>
