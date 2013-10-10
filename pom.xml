@@ -166,9 +166,6 @@
   <profiles>
       <profile>
           <id>fxbrwsr</id>
-          <activation>
-              <activeByDefault>true</activeByDefault>
-          </activation>
           <properties>
               <brwsr>fxbrwsr</brwsr>
           </properties>
@@ -228,10 +225,7 @@
       <profile>
           <id>bck2brwsr</id>
           <activation>
-              <property>
-                  <name>brwsr</name>
-                  <value>bck2brwsr</value>
-              </property>
+              <activeByDefault>true</activeByDefault>
           </activation>
           <build>
               <plugins>
