@@ -62,6 +62,10 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
         return classes.get(res);
     }
     
+    public Map<String, byte[]> getClasses() {
+        return classes;
+    }
+    
     /** Obtains errors created during compilation.
      */
     public List<Diagnostic<? extends JavaFileObject>> getErrors() {

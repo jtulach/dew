@@ -162,10 +162,16 @@ function DevCtrl( $scope, $http ) {
 //    var w = new SharedWorker('compiler.js', 'javac');
 //    $scope.javac = w.port;
     $scope.javac.onmessage = function(ev) {
-        console.log('compiled ' + ev.data);
+        var obj = ev.data;
+        if (obj.classes && obj.classes.length > 0) {
+            $scope.reload();
+        } else {
+            $scope.fail(obj.errors);
+        }
+        $scope.$apply("");
     };
     
-    $scope.$watch( "html", $scope.debounce( $scope.post, 2000 ) );
-    $scope.$watch( "java", $scope.debounce( $scope.post, 2000 ) );
+    $scope.$watch( "html", $scope.debounce( $scope.post, 500 ) );
+    $scope.$watch( "java", $scope.debounce( $scope.post, 500 ) );
 
 }
