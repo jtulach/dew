@@ -1,6 +1,6 @@
 /**
- * Back 2 Browser Bytecode Translator
- * Copyright (C) 2012 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * Development Environment for Web
+ * Copyright (C) 2012-2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,7 @@
  */
 package org.apidesign.bck2brwsr.dew;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,8 +32,6 @@ import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 

@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apidesign</groupId>
-    <artifactId>bck2brwsr</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <groupId>org.apidesign.bck2brwsr.dew</groupId>
+    <artifactId>pom</artifactId>
+    <version>0.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.apidesign.bck2brwsr</groupId>
-  <artifactId>dew</artifactId>
-  <version>0.9-SNAPSHOT</version>
-  <name>Development Environment for Web</name>
+  <groupId>org.apidesign.bck2brwsr.dew</groupId>
+  <artifactId>dynamic-dew</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <name>DEW with Dynamic Server Side</name>
   <url>http://maven.apache.org</url>
     <build>
         <plugins>
@@ -62,9 +62,9 @@
       <version>2.2.19</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>vm4brwsr</artifactId>
-      <version>${project.version}</version>
+      <version>${bck2brwsr.version}</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
@@ -83,21 +83,21 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>javaquery.api</artifactId>
-      <version>${project.version}</version>
+      <version>${bck2brwsr.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>vmtest</artifactId>
-      <version>${project.version}</version>
+      <version>${bck2brwsr.version}</version>
       <scope>test</scope>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>launcher.http</artifactId>
-      <version>${project.version}</version>
+      <version>${bck2brwsr.launcher.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

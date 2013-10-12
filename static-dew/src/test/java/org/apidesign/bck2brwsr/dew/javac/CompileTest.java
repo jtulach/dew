@@ -1,6 +1,6 @@
 /**
- * Back 2 Browser Bytecode Translator
- * Copyright (C) 2012 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * Development Environment for Web
+ * Copyright (C) 2012-2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  */
 package org.apidesign.bck2brwsr.dew.javac;
 
-import org.apidesign.bck2brwsr.dew.javac.Compile;
 import java.io.IOException;
 import java.util.Arrays;
 import org.apidesign.bck2brwsr.vmtest.Compare;
