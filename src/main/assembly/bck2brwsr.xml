@@ -17,6 +17,7 @@
             <include>*:rt</include>
         </includes>
     </dependencySet>
+    <!--
     <dependencySet>
         <useProjectArtifact>false</useProjectArtifact>
         <scope>provided</scope>
@@ -26,18 +27,9 @@
         <unpack>true</unpack>
         <outputDirectory>/</outputDirectory>
     </dependencySet>
+    -->
   </dependencySets> 
   <fileSets>
-      <fileSet>
-          <directory>${project.build.directory}/classes/org/apidesign/bck2brwsr/dew/javac/</directory>
-          <includes>
-              <include>**/*</include>
-          </includes>
-          <excludes>
-              <exclude>**/*.class</exclude>
-          </excludes>
-          <outputDirectory>/</outputDirectory>
-      </fileSet>
       <fileSet>
           <directory>src/main/webapp/pages</directory>
           <outputDirectory>/</outputDirectory>
@@ -47,6 +39,10 @@
   <files>
     <file>
       <source>${project.build.directory}/${project.build.finalName}.jar</source>
+      <outputDirectory>/</outputDirectory>
+    </file>
+    <file>
+      <source>${project.build.directory}/bck2brwsr.js</source>
       <outputDirectory>/</outputDirectory>
     </file>
   </files>

@@ -54,6 +54,7 @@
                   <execution>
                       <goals>
                           <goal>brwsr</goal>
+                          <goal>j2js</goal>
                       </goals>
                   </execution>
               </executions>
@@ -61,6 +62,7 @@
                   <directory>${basedir}/src/main/webapp/</directory>
                   <startpage>${brwsr.startpage}</startpage>
                   <launcher>${brwsr}</launcher>
+                  <ignoreBootClassPath>true</ignoreBootClassPath>
               </configuration>
           </plugin>
           <plugin>
@@ -80,6 +82,7 @@
                   <systemPropertyVariables>
                       <vmtest.brwsrs>${brwsr}</vmtest.brwsrs>
                       <vmtest.js>brwsr</vmtest.js>
+   <!-- should potentially work:                  <bck2brwsr.js>${project.build.directory}/bck2brwsr.js</bck2brwsr.js> -->
                   </systemPropertyVariables>
               </configuration>
           </plugin>
