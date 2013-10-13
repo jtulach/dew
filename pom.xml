@@ -10,7 +10,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
-      <net.java.html.version>0.6</net.java.html.version>
+      <net.java.html.version>0.7-SNAPSHOT</net.java.html.version>
       <bck2brwsr.version>0.9-SNAPSHOT</bck2brwsr.version>
       <bck2brwsr.launcher.version>0.9-SNAPSHOT</bck2brwsr.launcher.version>
       <bck2brwsr.obfuscationlevel>MINIMAL</bck2brwsr.obfuscationlevel>
