@@ -1503,10 +1503,12 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 if (usePrintSource)
                     file = printSource(env, cdef);
                 else {
+                    /*
                     if (fileManager.hasLocation(StandardLocation.NATIVE_HEADER_OUTPUT)
                             && jniWriter.needsHeader(cdef.sym)) {
                         jniWriter.write(cdef.sym);
                     }
+                    */
                     file = genCode(env, cdef);
                 }
                 if (results != null && file != null)
