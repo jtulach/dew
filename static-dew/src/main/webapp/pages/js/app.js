@@ -130,15 +130,6 @@ function DevCtrl( $scope, $http ) {
       };
     };
     
-    $scope.reload = function() {
-        $scope.errors = null;
-        var frame = document.getElementById("result");        
-        frame.src = "result.html";
-        frame.contentDocument.location.reload(true);
-        frame.contentWindow.location.reload();
-        document.getElementById("editorJava").codeMirror.clearGutter("issues");   
-    };
-    
     $scope.fail = function( data ) {
         $scope.errors = eval( data );
         var editor = document.getElementById("editorJava").codeMirror;   
@@ -151,9 +142,35 @@ function DevCtrl( $scope, $http ) {
     };
     
     $scope.post = function() {
-        console.log("Modified: " + $scope.java);
         $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
-        console.log("Msg sent");
+    };
+
+    $scope.run = function() {
+        $scope.result = $scope.html;
+        
+        if (!$scope.vm) {
+            $scope.vm = bck2brwsr('${project.build.finalName}.jar');
+        }
+        var vm = $scope.vm;
+        
+        var first = null;
+        for (var i = 0; i < $scope.classes.length; i++) {
+            var cn = $scope.classes[i].className;
+            cn = cn.substring(0, cn.length - 6).replace__Ljava_lang_String_2CC('/','.');
+            try {
+                vm.vm._reload(cn, $scope.classes[i].byteCode);
+            } catch (err) {
+                alert('Error loading ' + cn + ': ' + err.toString());
+            }
+            if (first === null) {
+                first = cn;
+            }
+        }
+        try {
+            vm.loadClass(first);
+        } catch (err) {
+            alert('Error loading ' + first + ': ' + err.toString());
+        }
     };
     
     $scope.errorClass = function( kind ) {
@@ -171,8 +188,14 @@ function DevCtrl( $scope, $http ) {
         editor.focus();
     };
     
+    $scope.noClasses = function() {
+        return $scope.classes === null;
+    };
+    
     $scope.tab = "html";
     $scope.html= templateHtml;  
+    $scope.result = "";
+    $scope.classes = null;
     $scope.java = templateJava;  
     var w = new Worker('compiler.js', 'javac');
     $scope.javac = w;
@@ -181,8 +204,15 @@ function DevCtrl( $scope, $http ) {
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
         if (obj.classes && obj.classes.length > 0) {
-            $scope.reload();
+            $scope.classes = obj.classes;
+            $scope.errors = null;
+            var editor = document.getElementById("editorJava").codeMirror;   
+            editor.clearGutter( "issues" );
+            // initialize the VM
+            var script = window.document.getElementById("bck2brwsr");
+            script.src = "bck2brwsr.js";
         } else {
+            $scope.classes = null;
             $scope.fail(obj.errors);
         }
         $scope.$apply("");

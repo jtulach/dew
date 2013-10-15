@@ -35,7 +35,7 @@
             <!-- a class="brand" style="font-size: 100%"><span class="text-info"><b>Java and HTML5</b></span><small>- Together at Last!</small></a-->
             <form class="navbar-form pull-right">
                 <!-- select class="span2"></select -->
-                <button ng-click="post()" class="btn btn-warning">Rebuild</button>
+                <button ng-click="run()" ng-hide="{{noClasses()}}" class="btn btn-warning">Run</button>
               </form>
             <!-- ul class="nav">                          
                 <li><select class="btn-small" type="text"></select></li>
@@ -96,12 +96,8 @@
             <li ng-class="'active'"><a href="#">Result</a></li>
         </ul>    
         
+        <div ng-bind-html-unsafe="result"></div>
         
-        <!-- button class="btn" ng-click="reload()">Reload</button -->
-        <iframe id="result" frameborder="0" scrolling="yes" width="100%" style="height: 1000px; overflow: auto; border: 1px solid #DFDFDF;" src="result.html">
-            <p>Your browser does not support iframes.</p>
-        </iframe>
-            
         </div>
         
         <script src="js/angular/angular.min.js"></script>
@@ -109,5 +105,6 @@
         <script src="js/codemirror/mode/xml.js"></script>
         <script src="js/codemirror/mode/clike.js"></script>
         <script src="js/app.js"></script>
+        <script id="bck2brwsr"></script>
     </body>
 </html>
