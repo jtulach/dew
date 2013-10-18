@@ -94,8 +94,10 @@ function DevCtrl( $scope, $http ) {
     var templateJava = 
 "package bck2brwsr.demo;\n" +
 "class YourFirstHTML5PageInRealLanguage {\n" +
-"  static { throw new IllegalStateException(\"Running!\"); }\n" +
-"}";
+"  public static void main(String... args) throws Exception { \n" +
+"    throw new IllegalStateException(\"Running!\");\n" +
+"  }\n" +
+"}\n";
 
     
     $scope.makeMarker = function( editor, line ) {
