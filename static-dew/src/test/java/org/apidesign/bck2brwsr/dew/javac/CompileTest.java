@@ -53,17 +53,19 @@ public class CompileTest  {
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
     }
-    @Test public void testAnnotationProcessorCompile() throws IOException {
+    
+    @Compare public String testAnnotationProcessorCompile() throws IOException {
         String html = "";
         String java = "package x.y.z;"
             + "@net.java.html.json.Model(className=\"Y\", properties={})\n"
             + "class X {\n"
-            + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }\n"
+            + "   static void main(String... args) { Y y = new Y(); }\n"
             + "}\n";
         Compile result = Compile.create(html, java);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);
+        return Arrays.toString(bytes);
     }
     
     @Factory public static Object[] create() {
