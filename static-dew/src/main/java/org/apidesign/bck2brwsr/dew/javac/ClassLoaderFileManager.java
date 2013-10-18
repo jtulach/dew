@@ -83,7 +83,14 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public Iterable<JavaFileObject> list(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
-        if (canRead(location)) {
+        /* Correctly canRead(location) should be used. However in the dew the rsources are loaded
+         * from the CLFM classloader so PLATFORM_CLASS_PATH and CLASSPATH are duplicates (javac allways
+         * calls list for both PLATFORM_CLASS_PATH and CLASSPATH.
+         * Also SOURCE_PATH is ignored as in dew there is no source path, just a single source file
+         * and SOURCE_OUTPUT for AnnotationProcessors
+         *
+         */
+        if (location == StandardLocation.PLATFORM_CLASS_PATH /*canRead(location)*/) {
             final List<JavaFileObject> res = new ArrayList<JavaFileObject>();
             for (String resource : getResources(convertFQNToResource(packageName))) {
                 final JavaFileObject jfo = new ClassLoaderJavaFileObject(resource);
@@ -217,6 +224,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                     }
                     arr.add(l);
                 }
+                content = arr;
             }
         }
         return content == null ? Collections.<String>emptyList() : content;
