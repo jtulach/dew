@@ -53,8 +53,7 @@ public abstract class BaseFileObject implements InferableJavaFileObject {
 
     @Override
     public boolean isNameCompatible(String simpleName, Kind kind) {
-        return this.kind == kind &&
-        getSimpleName(path).equals(simpleName);
+        return this.kind == kind && getSimpleName(path, true).equals(simpleName);
     }
 
     @Override
@@ -79,16 +78,24 @@ public abstract class BaseFileObject implements InferableJavaFileObject {
 
 
 
-    protected static String getSimpleName(String path) {
+    protected static String getSimpleName(String path, boolean removeExtension) {
         int slashIndex = path.lastIndexOf('/');
         assert slashIndex >= 0;
-        return (slashIndex + 1 < path.length()) ?
+        String name = (slashIndex + 1 < path.length()) ?
             path.substring(slashIndex + 1) :
             ""; //NOI18N
+        
+        if (removeExtension) {
+            int indx = name.lastIndexOf('.');
+            if (indx > 0) {
+                return name.substring(0, indx);
+            }
+        }
+        return name;
     }
 
     protected static Kind getKind(final String path) {
-        final String simpleName = getSimpleName(path);
+        final String simpleName = getSimpleName(path, false);
         final int dotIndex = simpleName.lastIndexOf('.'); //NOI18N
         final String ext = dotIndex > 0 ?
             simpleName.substring(dotIndex) :

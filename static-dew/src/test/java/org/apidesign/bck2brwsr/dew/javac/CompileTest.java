@@ -42,6 +42,17 @@ public class CompileTest  {
         return Arrays.toString(bytes);
     }
     
+    @Test public void canCompilePublicClass() throws IOException {
+        String html = "";
+        String java = "package x.y.z;"
+            + "public class X {\n"
+            + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }\n"
+            + "}\n";
+        Compile result = Compile.create(html, java);
+        
+        final byte[] bytes = result.get("x/y/z/X.class");
+        assertNotNull(bytes, "Class X is compiled: " + result);
+    }
     @Test public void testAnnotationProcessorCompile() throws IOException {
         String html = "";
         String java = "package x.y.z;"
