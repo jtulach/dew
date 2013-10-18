@@ -212,7 +212,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         if (content == null) {
             List<String> arr = new ArrayList<>();
             classPathContent.put(folder, arr);
-            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg-" + folder.replace('/', '.'));
+            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg" + folder.replace('/', '.'));
             if (in != null) {
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 for (;;) {
@@ -267,7 +267,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         for (Map.Entry<String, List<String>> en : cntent.entrySet()) {
             String pkg = en.getKey();
             List<String> classes = en.getValue();
-            File f = new File(dir, "pkg-" + pkg.replace('/', '.'));
+            File f = new File(dir, "pkg" + pkg.replace('/', '.'));
             FileWriter w = new FileWriter(f);
             for (String c : classes) {
                 w.append(c).append("\n");
