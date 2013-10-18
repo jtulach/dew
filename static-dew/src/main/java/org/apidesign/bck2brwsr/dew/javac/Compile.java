@@ -137,7 +137,11 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
 
     @Override
     public String toString() {
-        return "Compiled: " + classes.keySet();
+        if (getErrors().isEmpty()) {
+            return "Compiled: " + classes.keySet();
+        } else {
+            return "Compiled with errors: " + getErrors();
+        }
     }
     
     
