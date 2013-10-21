@@ -83,7 +83,14 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public Iterable<JavaFileObject> list(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
-        if (canRead(location)) {
+        /* Correctly canRead(location) should be used. However in the dew the rsources are loaded
+         * from the CLFM classloader so PLATFORM_CLASS_PATH and CLASSPATH are duplicates (javac allways
+         * calls list for both PLATFORM_CLASS_PATH and CLASSPATH.
+         * Also SOURCE_PATH is ignored as in dew there is no source path, just a single source file
+         * and SOURCE_OUTPUT for AnnotationProcessors
+         *
+         */
+        if (location == StandardLocation.PLATFORM_CLASS_PATH /*canRead(location)*/) {
             final List<JavaFileObject> res = new ArrayList<JavaFileObject>();
             for (String resource : getResources(convertFQNToResource(packageName))) {
                 final JavaFileObject jfo = new ClassLoaderJavaFileObject(resource);
@@ -157,7 +164,12 @@ public class ClassLoaderFileManager implements JavaFileManager {
     @Override
     public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
         if (canRead(location)) {
-            return new ClassLoaderJavaFileObject(convertFQNToResource(packageName) + '/' + relativeName); //NOI18N
+            StringBuilder resource = new StringBuilder(convertFQNToResource(packageName));
+            if (resource.length() > 0) {
+                resource.append('/');   //NOI18N
+            }
+            resource.append(relativeName);
+            return new ClassLoaderJavaFileObject(resource.toString());
         } else {
             throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
         }
@@ -166,9 +178,14 @@ public class ClassLoaderFileManager implements JavaFileManager {
     @Override
     public FileObject getFileForOutput(Location location, String packageName, String relativeName, FileObject sibling) throws IOException {
         if (canWrite(location)) {
-            final String resource = convertFQNToResource(packageName) + '/' + relativeName; //NOI18N
-            final MemoryFileObject res = new MemoryFileObject(resource, null);
-            register(location, resource, res);
+            StringBuilder resource = new StringBuilder(convertFQNToResource(packageName));
+            if (resource.length() > 0) {
+                resource.append('/');   //NOI18N
+            }
+            resource.append(relativeName);
+            String resourceStr = resource.toString();
+            final MemoryFileObject res = new MemoryFileObject(resourceStr, null);
+            register(location, resourceStr, res);
             return res;
         } else {
             throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
@@ -188,21 +205,6 @@ public class ClassLoaderFileManager implements JavaFileManager {
         return -1;
     }
 
-//    private List<String> getResources(String folder) throws IOException {
-//        final List<String> result = new ArrayList<String>();
-//        final BufferedReader in = new BufferedReader(new InputStreamReader(
-//                this.getClass().getClassLoader().getResourceAsStream(String.format("%s/pkg-list", folder.substring(0))),    //NOI18N
-//                "UTF-8"));  //NOI18N
-//        try {
-//            String line;
-//            while ((line = in.readLine()) != null) {
-//                result.add(line);
-//            }
-//        } finally {
-//            in.close();
-//        }
-//        return result;
-//    }
 
     private List<String> getResources(String folder) throws IOException {
         if (classPathContent == null) {
@@ -212,7 +214,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         if (content == null) {
             List<String> arr = new ArrayList<>();
             classPathContent.put(folder, arr);
-            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg" + folder.replace('/', '.'));
+            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg." + folder.replace('/', '.'));
             if (in != null) {
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 for (;;) {
@@ -222,6 +224,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                     }
                     arr.add(l);
                 }
+                content = arr;
             }
         }
         return content == null ? Collections.<String>emptyList() : content;
@@ -246,7 +249,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                             if (e.isDirectory()) {
                                 continue;
                             }
-                            final String name = String.format("/%s", e.getName());
+                            final String name = e.getName();
                             final String owner = getOwner(name);
                             List<String> content = cntent.get(owner);
                             if (content == null) {
@@ -259,7 +262,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                         zf.close();
                     }
                 } else if (f.isDirectory()) {
-                    addFiles(f, "/", cntent);
+                    addFiles(f, "", cntent);
                 }
             }
         }
@@ -267,7 +270,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         for (Map.Entry<String, List<String>> en : cntent.entrySet()) {
             String pkg = en.getKey();
             List<String> classes = en.getValue();
-            File f = new File(dir, "pkg" + pkg.replace('/', '.'));
+            File f = new File(dir, "pkg." + pkg.replace('/', '.'));
             FileWriter w = new FileWriter(f);
             for (String c : classes) {
                 w.append(c).append("\n");
@@ -277,8 +280,12 @@ public class ClassLoaderFileManager implements JavaFileManager {
     }
 
     private static void addFiles(File folder, String path, Map<String,List<String>> into) {
+        String prefix = path;
+        if (!prefix.isEmpty()) {
+            prefix = prefix + "/";  //NOI18N
+        }
         for (File f : folder.listFiles()) {
-            String fname = path + (path.length() == 1 ? "" : "/") +  f.getName();
+            String fname = prefix + f.getName();
             if (f.isDirectory()) {
                 addFiles(f, fname, into);
             } else {
@@ -306,9 +313,11 @@ public class ClassLoaderFileManager implements JavaFileManager {
     }
 
     private static String getOwner(String resource) {
-        int lastSlash = resource.lastIndexOf('/');
-        assert lastSlash >= 0;
-        return resource.substring(0, lastSlash);
+        int lastSlash = resource.lastIndexOf('/');  //NOI18N
+        assert lastSlash != 0;
+        return lastSlash < 0 ?
+            resource :
+            resource.substring(0, lastSlash);
     }
 
     private static boolean canRead(Location loc) {
@@ -339,17 +348,17 @@ public class ClassLoaderFileManager implements JavaFileManager {
     }
 
     static String convertFQNToResource(String fqn) {
-        return '/' + fqn.replace('.', '/');   //NOI18N
+        return fqn.replace('.', '/');   //NOI18N
     }
 
     static String convertResourceToFQN(String resource) {
-        assert resource.startsWith("/");    //NOI18N
+        assert !resource.startsWith("/");    //NOI18N
         int lastSlash = resource.lastIndexOf('/');  //NOI18N
         int lastDot = resource.lastIndexOf('.');    //NOI18N
-        int stop = lastSlash < lastDot ?
-            lastDot :
-            resource.length();
-        return resource.substring(1, stop).replace('/', '.');    //NOI18N
+        if (lastSlash < lastDot) {
+            resource = resource.substring(0, lastDot);
+        }
+        return resource.replace('/', '.');    //NOI18N
     }
 
 

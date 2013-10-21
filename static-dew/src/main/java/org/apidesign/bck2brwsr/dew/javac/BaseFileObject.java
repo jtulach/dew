@@ -33,8 +33,8 @@ public abstract class BaseFileObject implements InferableJavaFileObject {
     BaseFileObject(
         String path,
         Kind kind) {
-        if (!path.startsWith("/")) {    //NOI18N
-            throw new IllegalArgumentException();
+        if (path.startsWith("/")) {    //NOI18N
+            throw new IllegalArgumentException("Path cannot start with /"); //NOI18N
         }
         this.path = path;
         this.kind = kind;
@@ -79,12 +79,15 @@ public abstract class BaseFileObject implements InferableJavaFileObject {
 
 
     protected static String getSimpleName(String path, boolean removeExtension) {
-        int slashIndex = path.lastIndexOf('/');
-        assert slashIndex >= 0;
-        String name = (slashIndex + 1 < path.length()) ?
-            path.substring(slashIndex + 1) :
-            ""; //NOI18N
-        
+        int slashIndex = path.lastIndexOf('/'); //NOI18N
+        assert slashIndex != 0;
+        String name;
+        if (slashIndex < 0) {
+            name = path;
+        } else {
+            assert slashIndex + 1 < path.length();
+            name = path.substring(slashIndex + 1);
+        }
         if (removeExtension) {
             int indx = name.lastIndexOf('.');
             if (indx > 0) {
