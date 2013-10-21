@@ -143,10 +143,6 @@ function DevCtrl( $scope, $http ) {
         
     };
     
-    $scope.post = function() {
-        $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
-    };
-
     $scope.run = function() {
         $scope.result = $scope.html;
         
@@ -217,8 +213,22 @@ function DevCtrl( $scope, $http ) {
             $scope.classes = null;
             $scope.fail(obj.errors);
         }
+        $scope.javac.running = false;
+        if ($scope.javac.pending) {
+            $scope.javac.pending = false;
+            $scope.post();
+        }
         $scope.$apply("");
     };
+    $scope.post = function() {
+        if ($scope.javac.running) {
+            $scope.javac.pending = true;
+        } else {
+            $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
+            $scope.javac.running = true;
+        }
+    };
+
     
     $scope.$watch( "html", $scope.debounce( $scope.post, 500 ) );
     $scope.$watch( "java", $scope.debounce( $scope.post, 500 ) );
