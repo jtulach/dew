@@ -65,7 +65,10 @@ public class CompileTest  {
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);
-        return Arrays.toString(bytes);
+        
+        byte[] out = new byte[256];
+        System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
+        return Arrays.toString(out);
     }
     
     @Factory public static Object[] create() {
