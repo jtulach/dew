@@ -88,9 +88,9 @@ angular.module('bck2brwsr', []).
         };
 }]);
 
-function DevCtrl( $scope, $http ) {
+function DevCtrl( $scope, $timeout, $http ) {
     var templateHtml = 
-"<h1>Please select a gist...</h1>\n";
+"<h1>Please select a sample...</h1>\n";
     var templateJava = 
 "package waiting4javac;\n" +
 "class ToInitialize {\n" +
@@ -149,15 +149,34 @@ function DevCtrl( $scope, $http ) {
             script.src = "bck2brwsr.js";
             if (!window.bck2brwsr) {
                 $scope.result = '<h3>Initializing the Virtual Machine</h3> Please wait...';
-                window.setTimeout($scope.run, 100);
+                $timeout($scope.run, 100);
                 return;
             }
             
-            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar');
+            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', function(resource) {
+                if ($scope.classes) {
+                    for (var i = 0; i < $scope.classes.length; i++) {
+                        var c = $scope.classes[i];
+                        if (c.className == resource) {
+                            return c.byteCode;
+                        }
+                    }
+                }
+                return null;
+            });
         }
         var vm = $scope.vm;
-        $scope.result = $scope.html;
         
+        if ($scope.result !== "" && $scope.result !== $scope.html) {
+            $scope.result = "";
+            $timeout($scope.run, 100);
+            return;
+        } else if ($scope.result !== $scope.html) {
+            $scope.result = $scope.html;
+            $timeout($scope.run, 100);
+            return;
+        }
+
         var first = null;
         for (var i = 0; i < $scope.classes.length; i++) {
             var cn = $scope.classes[i].className;
@@ -165,16 +184,20 @@ function DevCtrl( $scope, $http ) {
             try {
                 vm.vm._reload(cn, $scope.classes[i].byteCode);
             } catch (err) {
-                alert('Error loading ' + cn + ': ' + err.toString());
+                $scope.status = 'Error loading ' + cn + ': ' + err.toString();
+                break;
             }
             if (first === null) {
                 first = cn;
             }
         }
         try {
-            vm.loadClass(first);
+            if (first !== null) {
+                vm.loadClass(first);
+                $scope.status = 'Class ' + first + ' loaded OK.';
+            }
         } catch (err) {
-            alert('Error loading ' + first + ': ' + err.toString());
+            $scope.status = 'Error loading ' + first + ': ' + err.toString();
         }
     };
     
@@ -253,12 +276,14 @@ function DevCtrl( $scope, $http ) {
     $scope.result = "";
     $scope.classes = null;
     $scope.java = templateJava;  
+    $scope.status = 'Initializing compiler...';
     var w = new Worker('compiler.js', 'javac');
     $scope.javac = w;
 //    var w = new SharedWorker('compiler.js', 'javac');
 //    $scope.javac = w.port;
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
+        $scope.status = obj.status;
         if (obj.classes && obj.classes.length > 0) {
             $scope.classes = obj.classes;
             $scope.errors = null;
@@ -281,6 +306,10 @@ function DevCtrl( $scope, $http ) {
         } else {
             $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
             $scope.javac.running = true;
+            if ($scope.status.indexOf('Init') < 0) {
+                $scope.status = 'Compiling...';
+                $scope.$apply("");
+            }
         }
     };
 

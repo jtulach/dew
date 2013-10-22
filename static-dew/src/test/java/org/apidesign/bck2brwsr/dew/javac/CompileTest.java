@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.apidesign.bck2brwsr.vmtest.Compare;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
@@ -52,6 +53,21 @@ public class CompileTest  {
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
+    }
+    
+    @Test public void mainClassIsFirst() throws IOException {
+        String html = "";
+        String java = "package x.y.z;"
+            + "public class X {\n"
+            + "   class I1 {}\n"
+            + "   class I2 {}\n"
+            + "   class I3 {}\n"
+            + "   class I4 {}\n"
+            + "   class I5 {}\n"
+            + "}\n";
+        org.apidesign.bck2brwsr.dew.javac.JavacResult result = org.apidesign.bck2brwsr.dew.javac.Main.doCompile(html, java);
+        assertEquals(result.getClasses().size(), 6, "Six classes generated");
+        assertEquals(result.getClasses().get(0).getClassName(), "x/y/z/X.class", "Main class is the first one");
     }
     
     @Compare public String testAnnotationProcessorCompile() throws IOException {

@@ -67,15 +67,22 @@ public final class Main {
             }
             final JavacClass jc = new JavacClass(e.getKey());
             jc.getByteCode().addAll(arr);
-            res.getClasses().add(jc);
-            
+            if (c.isMainClass(e.getKey())) {
+                res.getClasses().add(0, jc);
+            } else {
+                res.getClasses().add(jc);
+            }
         }
         if (!res.getErrors().isEmpty()) {
             res.setStatus("There are errors!");
         } else if (res.getClasses().isEmpty()) {
-            res.setStatus("No bytecode has been generated");
+            res.setStatus("No bytecode has been generated.");
         } else {
-            res.setStatus("OK.");
+            if (res.getClasses().size() == 1) {
+                res.setStatus("OK. The class has been generated. You can run it now.");
+            } else {
+                res.setStatus("OK. " + res.getClasses().size() + " classes have been generated. You can run them now.");
+            }
         }
         return res;
     }

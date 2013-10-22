@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="bck2brwsr" ng-controller="DevCtrl">
     <head>
-        <title>Back2Browser - DEW</title>
+        <title>DEW</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/bootstrap-combined.min.css"/>  
@@ -32,10 +32,12 @@
                 
         <div class="navbar navbar-fixed-top" style="width: 100%"> 
         <div class="navbar-inner" style="padding-left: 12px; padding-right: 12px;">
-            <a class="brand" style="font-size: 100%">DEW for Java in Brwsr</a>
+            <a class="brand" style="font-size: 100%" href="http://github.com/jtulach/dew/" target="_blank">
+                DEW 4 Java in a Brwsr
+            </a>
             <span class="text-info"><b ng-bind="description">Loading gist ...</b>
             </span>
-            (<a class="text-info" ng-href="{{url}}" ng-bind="gistid"></a>)
+            (<a class="text-info" ng-href="{{url}}" ng-bind="gistid" target="_blank"></a>)
             <form class="navbar-form pull-right">
                 <!-- select class="span2"></select -->
                 <button ng-click="run()" ng-hide="noClasses()" class="btn btn-warning">Run</button>
@@ -97,7 +99,8 @@
                 <td width="100%" class="text-error error-hover">{{e.msg}} <i class="icon-play"/></td>
             </tr>            
         </table>    
-            
+
+        <div class="show" ng-bind="status"></div>
         
         <div>&nbsp;</div>    
             

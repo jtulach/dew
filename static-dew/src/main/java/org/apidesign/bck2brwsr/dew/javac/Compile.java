@@ -65,6 +65,9 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     public Map<String, byte[]> getClasses() {
         return classes;
     }
+    public boolean isMainClass(String name) {
+        return name.endsWith('/' + cls + ".class");
+    }
     
     /** Obtains errors created during compilation.
      */
@@ -143,6 +146,4 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             return "Compiled with errors: " + getErrors();
         }
     }
-    
-    
 }
