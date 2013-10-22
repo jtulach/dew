@@ -85,11 +85,9 @@
         });
     };
 
-    /* Reads list of gist for authenticated user 
-     * XXX really read all of them not just first page 
-     */
-    global.GitHub.prototype.gists = function() {
-        return this.http({url: this.url + "gists",
+    /* Reads list of gist for a user */
+    global.GitHub.prototype.gists = function(user) {
+        return this.http({url: this.url + "users/" + user + "/gists",
             method: "GET",
             headers: this.headers
         });

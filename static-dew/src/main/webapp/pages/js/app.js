@@ -90,10 +90,11 @@ angular.module('bck2brwsr', []).
 
 function DevCtrl( $scope, $http ) {
     var templateHtml = 
-"<h1>Loading gist...</h1>\n";
+"<h1>Please select a gist...</h1>\n";
     var templateJava = 
-"package bck2brwsr.demo;\n" +
-"class Empty {\n" +
+"package waiting4javac;\n" +
+"class ToInitialize {\n" +
+"  /*int*/ myFirstError;\n" +
 "}\n";
 
     $scope.GitHub = new GitHub($http);
@@ -188,34 +189,56 @@ function DevCtrl( $scope, $http ) {
         return $scope.classes === null;
     };
     
+    $scope.loadGist = function() {
+        window.location.hash = "#" + $scope.gistid;
+        $scope.html = "<h1>Loading gist " + $scope.gistid + "</h1>"
+        $scope.java = "package waiting4gist;\nclass ToLoad {\n}\n";
+        $scope.GitHub.gist($scope.gistid).success(function(res) {
+            $scope.gistid = res.id;
+            $scope.url = res.html_url;
+            $scope.description = res.description;
+            for (var f in res.files) {
+                if (f.search(/\.html$/g) >= 0) {
+                    $scope.html = res.files[f].content;
+                }
+                if (f.search(/\.java$/g) >= 0) {
+                    $scope.java = res.files[f].content;
+                }
+            }
+        }).error(function(res) {
+            $scope.description = 'Bad thing happened: ' + res.message;
+        });
+    }
+    
     $scope.url = "http://github.com/jtulach/dew";
     $scope.description = "Development Environment for Web";
-    $scope.gistid = "";
     
     var gist = window.location.hash;
     if (!gist) {
-        // the first DEW gist ever made
-        gist = '7086050';
+        $scope.gistid = "-1";
+        $scope.samples = [{
+            "description" : "Loading samples...",
+            "id" : "-1"
+        }];
+        $scope.GitHub.gists('jtulach').success(function(res) {
+            res.unshift({
+               "description" : "Choose a sample...",
+               "id" : ""
+            });
+            $scope.samples = res;
+            $scope.gistid = "";
+        }).error(function (res) {
+            $scope.description = "Can't get list of gists: " + res.message;
+        });
     } else {
         // remove leading #
-        gist = gist.substring(1);
+        $scope.gistid = gist.substring(1);
+        $scope.samples = [{
+            "description" : "Preselected sample",
+            "id" : $scope.gistid
+        }];
+        $scope.loadGist();
     }
-    
-    $scope.GitHub.gist(gist).success(function(res) {
-       $scope.gistid = "(" + res.id + ")";
-       $scope.url = res.html_url;
-       $scope.description = res.description;
-       for (var f in res.files) {
-           if (f.search(/\.html$/g) >= 0) {
-               $scope.html = res.files[f].content;
-           }
-           if (f.search(/\.java$/g) >= 0) {
-               $scope.java = res.files[f].content;
-           }
-       }
-    }).error(function(res) {
-       $scope.description = 'Bad thing happened: ' + res.message;
-    });
     
     $scope.tab = "html";
     $scope.html= templateHtml;  

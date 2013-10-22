@@ -35,14 +35,20 @@
             <a class="brand" style="font-size: 100%">DEW for Java in Brwsr</a>
             <span class="text-info"><b ng-bind="description">Loading gist ...</b>
             </span>
-            <a class="text-info" ng-href="{{url}}" ng-bind="gistid"></a>
+            (<a class="text-info" ng-href="{{url}}" ng-bind="gistid"></a>)
             <form class="navbar-form pull-right">
                 <!-- select class="span2"></select -->
                 <button ng-click="run()" ng-hide="noClasses()" class="btn btn-warning">Run</button>
-              </form>
-            <!-- ul class="nav">                          
-                <li><select class="btn-small" type="text"></select></li>
-            </ul -->
+            </form>
+            <ul class="nav">                          
+                <li>
+                    <select class="btn-small" ng-change="loadGist()" 
+                            ng-model="gistid" 
+                            ng-options="s.id as s.id + ': ' + s.description for s in samples" 
+                            ng-required >
+                    </select>
+                </li>
+            </ul>
             <!-- form class="form form-horizontal pull-right">
                 <button class="btn btn-warning btn-small pull-right top" ng-click="post()">Rebuild</button>
             </form -->
