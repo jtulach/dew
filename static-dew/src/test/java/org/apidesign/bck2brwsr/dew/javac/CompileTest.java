@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.apidesign.bck2brwsr.vmtest.Compare;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
-import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
@@ -69,6 +68,23 @@ public class CompileTest  {
         assertEquals(result.getClasses().size(), 6, "Six classes generated");
         assertEquals(result.getClasses().get(0).getClassName(), "x/y/z/X.class", "Main class is the first one");
     }
+
+    @Compare public void canGenerateCallback() throws IOException {
+        String html = "";
+        String java = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "public class X {\n"
+            + "   @JavaScriptBody(args = \"r\", javacall = true, body = \"r.@java.lang.Runnable::run()()\")\n"
+            + "   public static native void call(Runnable r);"
+            + "}\n";    
+            
+        Compile result = Compile.create(html, java);
+        
+        final byte[] bytes = result.get("x/y/z/X.class");
+        assertNotNull(bytes, "Class X is compiled: " + result);
+        final byte[] bytes2 = result.get("x/y/z/$JsCallbacks$.class");
+        assertNotNull(bytes2, "Class for callbacks is compiled: " + result);
+    }
     
     @Compare public String testAnnotationProcessorCompile() throws IOException {
         String html = "";
@@ -94,5 +110,11 @@ public class CompileTest  {
     static void assertNotNull(Object obj, String msg) {
         assert obj != null : msg;
     }
-    
+
+    static void assertEquals(Object real, Object exp, String msg) {
+        if (real == exp) {
+            return;
+        }
+        assert real != null && real.equals(exp) : msg + ". Expected: " + exp + " but was: " + real;
+    }
 }
