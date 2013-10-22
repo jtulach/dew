@@ -192,9 +192,18 @@ function DevCtrl( $scope, $http ) {
     $scope.description = "Development Environment for Web";
     $scope.gistid = "";
     
-    $scope.GitHub.gist('7086050').success(function(res) {
+    var gist = window.location.hash;
+    if (!gist) {
+        // the first DEW gist ever made
+        gist = '7086050';
+    } else {
+        // remove leading #
+        gist = gist.substring(1);
+    }
+    
+    $scope.GitHub.gist(gist).success(function(res) {
        $scope.gistid = "(" + res.id + ")";
-       $scope.url = res.url;
+       $scope.url = res.html_url;
        $scope.description = res.description;
        for (var f in res.files) {
            if (f.search(/\.html$/g) >= 0) {
@@ -205,7 +214,7 @@ function DevCtrl( $scope, $http ) {
            }
        }
     }).error(function(res) {
-       $scope.description = 'Bad: ' + res;
+       $scope.description = 'Bad thing happened: ' + res.message;
     });
     
     $scope.tab = "html";
