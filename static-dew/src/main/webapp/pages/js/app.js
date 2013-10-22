@@ -90,15 +90,13 @@ angular.module('bck2brwsr', []).
 
 function DevCtrl( $scope, $http ) {
     var templateHtml = 
-"<h1>Hello World!</h1>\n";
+"<h1>Loading gist...</h1>\n";
     var templateJava = 
 "package bck2brwsr.demo;\n" +
-"class YourFirstHTML5PageInRealLanguage {\n" +
-"  public static void main(String... args) throws Exception { \n" +
-"    throw new IllegalStateException(\"Running!\");\n" +
-"  }\n" +
+"class Empty {\n" +
 "}\n";
 
+    $scope.GitHub = new GitHub($http);
     
     $scope.makeMarker = function( editor, line ) {
         var marker = document.createElement("div");
@@ -189,6 +187,26 @@ function DevCtrl( $scope, $http ) {
     $scope.noClasses = function() {
         return $scope.classes === null;
     };
+    
+    $scope.url = "http://github.com/jtulach/dew";
+    $scope.description = "Development Environment for Web";
+    $scope.gistid = "";
+    
+    $scope.GitHub.gist('7086050').success(function(res) {
+       $scope.gistid = "(" + res.id + ")";
+       $scope.url = res.url;
+       $scope.description = res.description;
+       for (var f in res.files) {
+           if (f.search(/\.html$/g) >= 0) {
+               $scope.html = res.files[f].content;
+           }
+           if (f.search(/\.java$/g) >= 0) {
+               $scope.java = res.files[f].content;
+           }
+       }
+    }).error(function(res) {
+       $scope.description = 'Bad: ' + res;
+    });
     
     $scope.tab = "html";
     $scope.html= templateHtml;  
