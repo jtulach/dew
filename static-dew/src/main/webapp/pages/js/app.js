@@ -143,12 +143,20 @@ function DevCtrl( $scope, $http ) {
     };
     
     $scope.run = function() {
-        $scope.result = $scope.html;
-        
         if (!$scope.vm) {
-            $scope.vm = bck2brwsr('${project.build.finalName}.jar');
+            // initialize the VM
+            var script = window.document.getElementById("brwsrvm");
+            script.src = "bck2brwsr.js";
+            if (!window.bck2brwsr) {
+                $scope.result = '<h3>Initializing the Virtual Machine</h3> Please wait...';
+                window.setTimeout($scope.run, 100);
+                return;
+            }
+            
+            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar');
         }
         var vm = $scope.vm;
+        $scope.result = $scope.html;
         
         var first = null;
         for (var i = 0; i < $scope.classes.length; i++) {
@@ -191,8 +199,8 @@ function DevCtrl( $scope, $http ) {
     
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
-        $scope.html = "<h1>Loading gist " + $scope.gistid + "</h1>"
-        $scope.java = "package waiting4gist;\nclass ToLoad {\n}\n";
+        $scope.html = "<h1>Loading gist " + $scope.gistid + "</h1>";
+        $scope.java = "package waiting4gist;\nclass ToLoad {\n  please wait ...\n}\n";
         $scope.GitHub.gist($scope.gistid).success(function(res) {
             $scope.gistid = res.id;
             $scope.url = res.html_url;
@@ -256,9 +264,6 @@ function DevCtrl( $scope, $http ) {
             $scope.errors = null;
             var editor = document.getElementById("editorJava").codeMirror;   
             editor.clearGutter( "issues" );
-            // initialize the VM
-            var script = window.document.getElementById("bck2brwsr");
-            script.src = "bck2brwsr.js";
         } else {
             $scope.classes = null;
             $scope.fail(obj.errors);
