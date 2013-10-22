@@ -148,7 +148,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             var script = window.document.getElementById("brwsrvm");
             script.src = "bck2brwsr.js";
             if (!window.bck2brwsr) {
-                $scope.result = '<h3>Initializing the Virtual Machine</h3> Please wait...';
+                $scope.result('<h3>Initializing the Virtual Machine</h3> Please wait...');
                 $timeout($scope.run, 100);
                 return;
             }
@@ -167,38 +167,33 @@ function DevCtrl( $scope, $timeout, $http ) {
         }
         var vm = $scope.vm;
         
-        if ($scope.result !== "" && $scope.result !== $scope.html) {
-            $scope.result = "";
-            $timeout($scope.run, 100);
-            return;
-        } else if ($scope.result !== $scope.html) {
-            $scope.result = $scope.html;
-            $timeout($scope.run, 100);
-            return;
-        }
-
-        var first = null;
-        for (var i = 0; i < $scope.classes.length; i++) {
-            var cn = $scope.classes[i].className;
-            cn = cn.substring(0, cn.length - 6).replace__Ljava_lang_String_2CC('/','.');
+        $scope.result("");
+        $timeout(function() {
+            $scope.result($scope.html);
+        }, 100).then(function() {
+            var first = null;
+            for (var i = 0; i < $scope.classes.length; i++) {
+                var cn = $scope.classes[i].className;
+                cn = cn.substring(0, cn.length - 6).replace__Ljava_lang_String_2CC('/','.');
+                try {
+                    vm.vm._reload(cn, $scope.classes[i].byteCode);
+                } catch (err) {
+                    $scope.status = 'Error loading ' + cn + ': ' + err.toString();
+                    break;
+                }
+                if (first === null) {
+                    first = cn;
+                }
+            }   
             try {
-                vm.vm._reload(cn, $scope.classes[i].byteCode);
+                if (first !== null) {
+                    vm.loadClass(first);
+                    $scope.status = 'Class ' + first + ' loaded OK.';
+                }
             } catch (err) {
-                $scope.status = 'Error loading ' + cn + ': ' + err.toString();
-                break;
+                $scope.status = 'Error loading ' + first + ': ' + err.toString();
             }
-            if (first === null) {
-                first = cn;
-            }
-        }
-        try {
-            if (first !== null) {
-                vm.loadClass(first);
-                $scope.status = 'Class ' + first + ' loaded OK.';
-            }
-        } catch (err) {
-            $scope.status = 'Error loading ' + first + ': ' + err.toString();
-        }
+        }, 100);
     };
     
     $scope.errorClass = function( kind ) {
@@ -240,6 +235,12 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.description = 'Bad thing happened: ' + res.message;
         });
     }
+
+    $scope.result = function(html) {
+        var e = window.document.getElementById("result");
+        e.innerHTML = html;
+    };
+
     
     $scope.url = "http://github.com/jtulach/dew";
     $scope.description = "Development Environment for Web";
@@ -273,7 +274,6 @@ function DevCtrl( $scope, $timeout, $http ) {
     
     $scope.tab = "html";
     $scope.html= templateHtml;  
-    $scope.result = "";
     $scope.classes = null;
     $scope.java = templateJava;  
     $scope.status = 'Initializing compiler...';
