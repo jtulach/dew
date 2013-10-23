@@ -83,7 +83,7 @@
                   <systemPropertyVariables>
                       <vmtest.brwsrs>${brwsr}</vmtest.brwsrs>
                       <vmtest.js>brwsr</vmtest.js>
-   <!-- should potentially work:                  <bck2brwsr.js>${project.build.directory}/bck2brwsr.js</bck2brwsr.js> -->
+                      <bck2brwsr.js>${project.build.directory}/bck2brwsr.js</bck2brwsr.js>
                   </systemPropertyVariables>
               </configuration>
           </plugin>
