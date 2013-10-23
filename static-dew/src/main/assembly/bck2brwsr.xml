@@ -54,6 +54,7 @@
           <outputDirectory>/</outputDirectory>
           <includes>
               <include>**/*.html</include>
+              <include>**/*.js</include>
           </includes>
           <filtered>true</filtered>
       </fileSet>
@@ -62,6 +63,7 @@
           <outputDirectory>/</outputDirectory>
           <excludes>
               <exclude>**/*.html</exclude>
+              <exclude>**/*.js</exclude>
           </excludes>
           <filtered>false</filtered>
       </fileSet>
