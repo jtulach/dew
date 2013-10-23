@@ -153,7 +153,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 return;
             }
             
-            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', function(resource) {
+            $scope.vm = window.bck2brwsr('static-dew-0.1-SNAPSHOT.jar', function(resource) {
                 if ($scope.classes) {
                     for (var i = 0; i < $scope.classes.length; i++) {
                         var c = $scope.classes[i];
