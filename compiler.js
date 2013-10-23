@@ -19,7 +19,7 @@ importScripts('bck2brwsr.js');
 
 window = {};
 
-var vm = bck2brwsr('static-dew-0.1-SNAPSHOT.jar');
+var vm = bck2brwsr('${project.build.finalName}.jar');
 vm.loadClass('org.apidesign.bck2brwsr.dew.javac.Main');
 
 //onconnect = function(ev) {
