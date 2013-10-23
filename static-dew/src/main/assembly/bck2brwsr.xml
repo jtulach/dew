@@ -52,7 +52,18 @@
       <fileSet>
           <directory>src/main/webapp/pages</directory>
           <outputDirectory>/</outputDirectory>
+          <includes>
+              <include>**/*.html</include>
+          </includes>
           <filtered>true</filtered>
+      </fileSet>
+      <fileSet>
+          <directory>src/main/webapp/pages</directory>
+          <outputDirectory>/</outputDirectory>
+          <excludes>
+              <exclude>**/*.html</exclude>
+          </excludes>
+          <filtered>false</filtered>
       </fileSet>
   </fileSets>
   <files>
