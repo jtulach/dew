@@ -34,6 +34,7 @@
         </goals>
         <properties>
             <jpda.listen>maven</jpda.listen>
+            <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
         </properties>
     </action>
 </actions>

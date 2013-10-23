@@ -44,6 +44,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <brwsr.startpage>pages/index.html</brwsr.startpage>
+    <bck2brwsr.obfuscationlevel>MINIMAL</bck2brwsr.obfuscationlevel>
   </properties>
   <build>
       <plugins>
@@ -64,6 +65,7 @@
                   <startpage>${brwsr.startpage}</startpage>
                   <launcher>${brwsr}</launcher>
                   <ignoreBootClassPath>true</ignoreBootClassPath>
+                  <obfuscation>${bck2brwsr.obfuscationlevel}</obfuscation>
               </configuration>
           </plugin>
           <plugin>
