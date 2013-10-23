@@ -217,8 +217,8 @@ function DevCtrl( $scope, $timeout, $http ) {
     
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
-        $scope.html = "<h1>Loading gist " + $scope.gistid + "</h1>";
-        $scope.java = "package waiting4gist;\nclass ToLoad {\n  please wait ...\n}\n";
+        $scope.html = "<h1>Loading gist..." + $scope.gistid + "</h1>";
+        $scope.java = "package waiting4gist;\nclass ToLoad {\n  /* please wait ... */\n}\n";
         $scope.GitHub.gist($scope.gistid).success(function(res) {
             $scope.gistid = res.id;
             $scope.url = res.html_url;
@@ -231,6 +231,10 @@ function DevCtrl( $scope, $timeout, $http ) {
                     $scope.java = res.files[f].content;
                 }
             }
+            $scope.classes = null;
+            $scope.errors = null;
+            var editor = document.getElementById("editorJava").codeMirror;   
+            editor.clearGutter( "issues" );
         }).error(function(res) {
             $scope.description = 'Bad thing happened: ' + res.message;
         });
