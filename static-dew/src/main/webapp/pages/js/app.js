@@ -294,10 +294,10 @@ function DevCtrl( $scope, $timeout, $http ) {
     }
     $scope.classes = null;
     $scope.status = 'Initializing compiler...';
-    var w = new Worker('compiler.js', 'javac');
-    $scope.javac = w;
-//    var w = new SharedWorker('compiler.js', 'javac');
-//    $scope.javac = w.port;
+//    var w = new Worker('compiler.js', 'javac');
+//    $scope.javac = w;
+    var w = new SharedWorker('compiler.js', 'javac');
+    $scope.javac = w.port;
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
         $scope.status = obj.status;
