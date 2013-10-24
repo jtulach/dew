@@ -15,23 +15,6 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
-importScripts('bck2brwsr.js');
+importScripts('compiler.js');
 
-window = {};
-
-var vm = bck2brwsr('${project.build.finalName}.jar');
-vm.loadClass('org.apidesign.bck2brwsr.dew.javac.Main');
-
-function initCompiler(port) {
-    if (!window.javac) {
-        port.postMessage({ "status" : "No Javac defined!", classes : [], "errors" : [] });
-        throw 'No Javac defined!';
-    }
-
-    port.postMessage({ "status" : "Ready!", classes : [], "errors" : [] });
-    port.onmessage = function(ev) {
-        var res = window.javac.compile(ev.data.html, ev.data.java);
-        res = eval("(" + res.toString() + ")");
-        port.postMessage(res);
-    };
-}
+initCompiler(this);
