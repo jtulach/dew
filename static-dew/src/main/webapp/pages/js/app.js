@@ -251,19 +251,31 @@ function DevCtrl( $scope, $timeout, $http ) {
     
     var gist = window.location.hash;
     if (!gist) {
-        $scope.gistid = "-1";
+        if (localStorage.gistid) {
+            $scope.gistid = localStorage.gistid;
+            $scope.java = localStorage.java;
+            $scope.html = localStorage.html;
+        } else {
+            $scope.gistid = "-1";
+        }
         $scope.samples = [{
             "description" : "Loading samples...",
             "id" : "-1"
         }];
-        $scope.GitHub.gists('jtulach').success(function(res) {
-            res.unshift({
+        var samples = [
+            {
                "description" : "Choose a sample...",
                "id" : ""
-            });
-            $scope.samples = res;
+            }
+        ];
+        var loadSamples = function(res) {
+            for (var i = 0; i < res.length; i++) {
+                samples.push(res[i]);
+            }
+            $scope.samples = samples;
             $scope.gistid = "";
-        }).error(function (res) {
+        };
+        $scope.GitHub.gists('jtulach').success(loadSamples).error(function (res) {
             $scope.description = "Can't get list of gists: " + res.message;
         });
     } else {
@@ -275,11 +287,12 @@ function DevCtrl( $scope, $timeout, $http ) {
         }];
         $scope.loadGist();
     }
-    
-    $scope.tab = "html";
-    $scope.html= templateHtml;  
+
+    if (!$scope.html) {
+        $scope.html= templateHtml;  
+        $scope.java = templateJava;  
+    }
     $scope.classes = null;
-    $scope.java = templateJava;  
     $scope.status = 'Initializing compiler...';
     var w = new Worker('compiler.js', 'javac');
     $scope.javac = w;
@@ -315,6 +328,9 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.$apply("");
             }
         }
+        localStorage.gistid = $scope.gistid;
+        localStorage.java = $scope.java;
+        localStorage.html = $scope.html;
     };
 
     
