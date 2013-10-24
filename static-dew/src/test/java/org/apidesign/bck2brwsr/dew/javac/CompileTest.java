@@ -103,6 +103,31 @@ public class CompileTest  {
         return Arrays.toString(out);
     }
     
+    @Compare public String modelReferencesClass() throws IOException {
+        String html = "";
+        String java = "package x.y.z;"
+            + "@net.java.html.json.Model(className=\"Y\", properties={\n"
+            + "  @net.java.html.json.Property(name=\"x\",type=X.class, array = true)\n"
+            + "})\n"
+            + "class YImpl {\n"
+            + "  @net.java.html.json.Model(className=\"X\", properties={})\n"
+            + "  static class XImpl {\n"
+            + "  }\n"
+            + "  static void main(String... args) {\n"
+            + "     Y y = new Y(new X(), new X());\n"
+            + "     y.applyBindings();\n"
+            + "  }\n"
+            + "}\n";
+        Compile result = Compile.create(html, java);
+        
+        final byte[] bytes = result.get("x/y/z/Y.class");
+        assertNotNull(bytes, "Class Y is compiled: " + result);
+        
+        byte[] out = new byte[256];
+        System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
+        return Arrays.toString(out);
+    }
+    
     @Factory public static Object[] create() {
         return VMTest.create(CompileTest.class);
     }
