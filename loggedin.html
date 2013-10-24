@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DEW - After Login Redirect</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <div>Redirecting...</div>
+        <script type="text/javascript">
+            var whereTo = unescape(window.location.search.match(/state=[^&]*/)[0].substring(6)) + window.location.search;
+            window.location = whereTo;
+        </script>
+    </body>
+</html>
