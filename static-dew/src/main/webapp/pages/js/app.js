@@ -221,6 +221,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         $scope.java = "package waiting4gist;\nclass ToLoad {\n  /* please wait ... */\n}\n";
         $scope.GitHub.gist($scope.gistid).success(function(res) {
             $scope.gistid = res.id;
+            $scope.userid = res.user.login;
             $scope.url = res.html_url;
             $scope.description = res.description;
             for (var f in res.files) {
