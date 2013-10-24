@@ -10,7 +10,7 @@
             var code = window.location.search.match(/code=[0-9a-f]*/)[0].substring(5);
             
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', "https://github.com/login/oauth/authorize&client_id=3479cb2e9dd5f762848&client_secret=1c1feea05904a92aee0eba0fe432c2915bdc0129&code=" + code, false);
+            xhr.open('POST', "https://github.com/login/oauth/authorize&client_id=13479cb2e9dd5f762848&client_secret=1c1feea05904a92aee0eba0fe432c2915bdc0129&code=" + code, false);
             xhr.setRequestHeader("Accept", "application/json");
             xhr.send();
             var r = eval('(' + xhr.responseText + ')');
