@@ -214,6 +214,14 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.noClasses = function() {
         return $scope.classes === null;
     };
+
+    $scope.save = function() {
+        localStorage.html = $scope.html;
+        localStorage.java = $scope.java;
+        localStorage.gistid = $scope.gistid;
+        var url = escape(window.location.href.match(/.*\//) + "save.html" + "?gistid=" + $scope.gistid);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://jtulach.github.io/dew/loggedin.html&state=" + url);
+    };
     
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
