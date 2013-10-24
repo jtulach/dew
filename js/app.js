@@ -153,7 +153,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 return;
             }
             
-            $scope.vm = window.bck2brwsr('static-dew-0.1-SNAPSHOT.jar', function(resource) {
+            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', function(resource) {
                 if ($scope.classes) {
                     for (var i = 0; i < $scope.classes.length; i++) {
                         var c = $scope.classes[i];
@@ -196,6 +196,14 @@ function DevCtrl( $scope, $timeout, $http ) {
         }, 100);
     };
     
+    $scope.save = function() {
+        localStorage.html = $scope.html;
+        localStorage.java = $scope.java;
+        localStorage.gistid = $scope.gistid;
+        var url = escape(window.location.href.match(/.*\//) + "save.html" + "?gistid=" + $scope.gistid);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://jtulach.github.io/dew/loggedin.html&state=" + url);
+    };
+    
     $scope.errorClass = function( kind ) {
         switch( kind ) {
             case "ERROR" :
@@ -221,6 +229,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         $scope.java = "package waiting4gist;\nclass ToLoad {\n  /* please wait ... */\n}\n";
         $scope.GitHub.gist($scope.gistid).success(function(res) {
             $scope.gistid = res.id;
+            $scope.userid = res.user.login;
             $scope.url = res.html_url;
             $scope.description = res.description;
             for (var f in res.files) {
@@ -251,19 +260,31 @@ function DevCtrl( $scope, $timeout, $http ) {
     
     var gist = window.location.hash;
     if (!gist) {
-        $scope.gistid = "-1";
+        if (localStorage.gistid) {
+            $scope.gistid = localStorage.gistid;
+            $scope.java = localStorage.java;
+            $scope.html = localStorage.html;
+        } else {
+            $scope.gistid = "-1";
+        }
         $scope.samples = [{
             "description" : "Loading samples...",
             "id" : "-1"
         }];
-        $scope.GitHub.gists('jtulach').success(function(res) {
-            res.unshift({
+        var samples = [
+            {
                "description" : "Choose a sample...",
                "id" : ""
-            });
-            $scope.samples = res;
+            }
+        ];
+        var loadSamples = function(res) {
+            for (var i = 0; i < res.length; i++) {
+                samples.push(res[i]);
+            }
+            $scope.samples = samples;
             $scope.gistid = "";
-        }).error(function (res) {
+        };
+        $scope.GitHub.gists('jtulach').success(loadSamples).error(function (res) {
             $scope.description = "Can't get list of gists: " + res.message;
         });
     } else {
@@ -275,16 +296,17 @@ function DevCtrl( $scope, $timeout, $http ) {
         }];
         $scope.loadGist();
     }
-    
-    $scope.tab = "html";
-    $scope.html= templateHtml;  
+
+    if (!$scope.html) {
+        $scope.html= templateHtml;  
+        $scope.java = templateJava;  
+    }
     $scope.classes = null;
-    $scope.java = templateJava;  
     $scope.status = 'Initializing compiler...';
-    var w = new Worker('compiler.js', 'javac');
-    $scope.javac = w;
-//    var w = new SharedWorker('compiler.js', 'javac');
-//    $scope.javac = w.port;
+//    var w = new Worker('compiler.js', 'javac');
+//    $scope.javac = w;
+    var w = new SharedWorker('compiler.js', 'javac');
+    $scope.javac = w.port;
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
         $scope.status = obj.status;
@@ -315,6 +337,9 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.$apply("");
             }
         }
+        localStorage.gistid = $scope.gistid;
+        localStorage.java = $scope.java;
+        localStorage.html = $scope.html;
     };
 
     
