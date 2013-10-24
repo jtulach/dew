@@ -153,7 +153,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 return;
             }
             
-            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', function(resource) {
+            $scope.vm = window.bck2brwsr('static-dew-0.1-SNAPSHOT.jar', function(resource) {
                 if ($scope.classes) {
                     for (var i = 0; i < $scope.classes.length; i++) {
                         var c = $scope.classes[i];
@@ -196,14 +196,6 @@ function DevCtrl( $scope, $timeout, $http ) {
         }, 100);
     };
     
-    $scope.save = function() {
-        localStorage.html = $scope.html;
-        localStorage.java = $scope.java;
-        localStorage.gistid = $scope.gistid;
-        var url = escape(window.location.href.match(/.*\//) + "save.html" + "?gistid=" + $scope.gistid);
-        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://jtulach.github.io/dew/loggedin.html&state=" + url);
-    };
-    
     $scope.errorClass = function( kind ) {
         switch( kind ) {
             case "ERROR" :
@@ -221,6 +213,14 @@ function DevCtrl( $scope, $timeout, $http ) {
     
     $scope.noClasses = function() {
         return $scope.classes === null;
+    };
+
+    $scope.save = function() {
+        localStorage.html = $scope.html;
+        localStorage.java = $scope.java;
+        localStorage.gistid = $scope.gistid;
+        var url = escape(window.location.href.match(/.*\//) + "save.html" + "?gistid=" + $scope.gistid);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://jtulach.github.io/dew/loggedin.html&state=" + url);
     };
     
     $scope.loadGist = function() {
@@ -303,10 +303,13 @@ function DevCtrl( $scope, $timeout, $http ) {
     }
     $scope.classes = null;
     $scope.status = 'Initializing compiler...';
-//    var w = new Worker('compiler.js', 'javac');
-//    $scope.javac = w;
-    var w = new SharedWorker('compiler.js', 'javac');
-    $scope.javac = w.port;
+    if (typeof SharedWorker === 'undefined') {
+      var w = new Worker('privatecompiler.js', 'javac');
+      $scope.javac = w;
+    } else {
+        var w = new SharedWorker('sharedcompiler.js', 'javac');
+        $scope.javac = w.port;
+    }
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
         $scope.status = obj.status;

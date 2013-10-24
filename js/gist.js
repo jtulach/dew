@@ -101,6 +101,14 @@
         });
     };
 
+    global.GitHub.prototype.forkGist = function(gist) {
+        return this.http({url: this.url + "gists/" + gist + "/forks",
+            method: "POST",
+            headers: this.headers,
+            data: gist
+        });
+    };
+
     global.GitHub.prototype.updateGist = function(id, gist) {
         return this.http({url: this.url + "gists/" + id,
             method: "PATCH",
