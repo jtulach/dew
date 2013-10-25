@@ -274,9 +274,7 @@ public class Annotate {
             return new Attribute.Constant(expected, result.constValue());
         }
         if (expected.tsym == syms.classType.tsym) {
-            Type result = attr.attribExpr(tree, env, expected);
-            if (result.isErroneous())
-                return new Attribute.Error(expected);
+            attr.attribExpr(tree, env, expected);
             if (TreeInfo.name(tree) != names._class) {
                 log.error(tree.pos(), "annotation.value.must.be.class.literal");
                 return new Attribute.Error(expected);
