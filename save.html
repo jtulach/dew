@@ -20,8 +20,8 @@
                     type: 'POST',
                     url: "https://github.com/login/oauth/access_token?client_id=13479cb2e9dd5f762848&client_secret=1c1feea05904a92aee0eba0fe432c2915bdc0129&code=" + code,
                     crossDomain: true,
-                    data: '{}',
-                    dataType: 'json',
+                    data: '',
+                    dataType: ' text',
                     success: function(responseData, textStatus, jqXHR) {
                         var value = responseData.access_token;
                         alert(value);
