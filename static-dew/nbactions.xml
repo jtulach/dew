@@ -25,6 +25,9 @@
             <goal>process-classes</goal>
             <goal>bck2brwsr:brwsr</goal>
         </goals>
+        <properties>
+            <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
+        </properties>
     </action>
     <action>
         <actionName>debug</actionName>
