@@ -32,7 +32,7 @@
                 
         <div class="navbar navbar-fixed-top" style="width: 100%"> 
         <div class="navbar-inner" style="padding-left: 12px; padding-right: 12px;">
-            <a class="brand" style="font-size: 100%" href="http://github.com/jtulach/dew/" target="_blank">
+            <a class="brand" style="font-size: 100%" href="http://dew.apidesign.org/" target="_blank">
                 DEW 4 Java in a Brwsr
             </a>
             <span class="text-info"><b ng-bind="description">Loading gist ...</b>
@@ -40,6 +40,7 @@
             (<a class="text-info" ng-href="{{url}}" ng-bind="gistid" target="_blank"></a>)
             <form class="navbar-form pull-right">
                 <!-- select class="span2"></select -->
+                <button ng-click="save()" class="btn btn-warning">Save</button>
                 <button ng-click="run()" ng-hide="noClasses()" class="btn btn-warning">Run</button>
             </form>
             <ul class="nav">                          
@@ -117,7 +118,6 @@
         <script src="js/codemirror/mode/xml.js"></script>
         <script src="js/codemirror/mode/clike.js"></script>
         <script src="js/app.js"></script>
-        <script src="js/gist.js"></script>
         <script id="brwsrvm"></script>
     </body>
 </html>

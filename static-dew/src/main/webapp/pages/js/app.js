@@ -97,8 +97,14 @@ function DevCtrl( $scope, $timeout, $http ) {
 "  /*int*/ myFirstError;\n" +
 "}\n";
 
-    $scope.GitHub = new GitHub($http);
-    
+    function parseJson(s) {
+      if (typeof s === 'string') {
+        return JSON.parse(s);
+      } else {
+        return s;
+      }
+    }
+
     $scope.makeMarker = function( editor, line ) {
         var marker = document.createElement("div");
         marker.innerHTML = " ";
@@ -219,34 +225,44 @@ function DevCtrl( $scope, $timeout, $http ) {
         localStorage.html = $scope.html;
         localStorage.java = $scope.java;
         localStorage.gistid = $scope.gistid;
-        var url = escape(window.location.href.match(/.*\//) + "save.html" + "?gistid=" + $scope.gistid);
-        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://jtulach.github.io/dew/loggedin.html&state=" + url);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/save.html&state=" + $scope.gistid);
     };
     
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
         $scope.html = "<h1>Loading gist..." + $scope.gistid + "</h1>";
         $scope.java = "package waiting4gist;\nclass ToLoad {\n  /* please wait ... */\n}\n";
-        $scope.GitHub.gist($scope.gistid).success(function(res) {
-            $scope.gistid = res.id;
-            $scope.userid = res.user.login;
-            $scope.url = res.html_url;
-            $scope.description = res.description;
-            for (var f in res.files) {
-                if (f.search(/\.html$/g) >= 0) {
-                    $scope.html = res.files[f].content;
-                }
-                if (f.search(/\.java$/g) >= 0) {
-                    $scope.java = res.files[f].content;
-                }
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://api.github.com/gists/" + $scope.gistid);
+        xhr.responseType = "json";
+        xhr.send();
+        xhr.onreadystatechange = function(ev) {
+            if (xhr.readyState !== 4) {
+                return;
             }
-            $scope.classes = null;
-            $scope.errors = null;
-            var editor = document.getElementById("editorJava").codeMirror;   
-            editor.clearGutter( "issues" );
-        }).error(function(res) {
-            $scope.description = 'Bad thing happened: ' + res.message;
-        });
+            if (xhr.status !== 200) {
+                $scope.description = "Can't get list of gists: " + xhr.statusText;
+                $scope.description = 'Bad thing happened: ' + res.message;
+            } else {
+                var res = parseJson(xhr.response);
+                $scope.gistid = res.id;
+                $scope.userid = res.user.login;
+                $scope.url = res.html_url;
+                $scope.description = res.description;
+                for (var f in res.files) {
+                    if (f.search(/\.html$/g) >= 0) {
+                        $scope.html = res.files[f].content;
+                    }
+                    if (f.search(/\.java$/g) >= 0) {
+                        $scope.java = res.files[f].content;
+                    }
+                }
+                $scope.classes = null;
+                $scope.errors = null;
+                var editor = document.getElementById("editorJava").codeMirror;
+                editor.clearGutter("issues");
+            }
+        };
     }
 
     $scope.result = function(html) {
@@ -255,7 +271,7 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
 
     
-    $scope.url = "http://github.com/jtulach/dew";
+    $scope.url = "http://dew.apidesign.org";
     $scope.description = "Development Environment for Web";
     
     var gist = window.location.hash;
@@ -284,9 +300,22 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.samples = samples;
             $scope.gistid = "";
         };
-        $scope.GitHub.gists('jtulach').success(loadSamples).error(function (res) {
-            $scope.description = "Can't get list of gists: " + res.message;
-        });
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://api.github.com/users/jtulach/gists");
+        xhr.responseType = "json";
+        xhr.send();
+        xhr.onreadystatechange = function(ev) {
+            if (xhr.readyState !== 4) {
+                return;
+            }
+            if (xhr.status !== 200) {
+                $scope.description = "Can't get list of gists: " + xhr.statusText;
+            } else {
+                var rsp = parseJson(xhr.response);
+                loadSamples(rsp);
+            }
+            $scope.$apply("");
+        };
     } else {
         // remove leading #
         $scope.gistid = gist.substring(1);
