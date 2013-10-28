@@ -220,6 +220,16 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.noClasses = function() {
         return $scope.classes === null;
     };
+    
+    $scope.noModification = function() {
+        if (!$scope.gistid) return true;
+        if (!$scope.origJava) return true;
+        if (!$scope.origHtml) return true;
+        if ($scope.origJava === $scope.java && $scope.origHtml === $scope.html) {
+            return true;
+        }
+        return false;
+    };
 
     $scope.save = function() {
         localStorage.html = $scope.html;
@@ -251,10 +261,10 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.description = res.description;
                 for (var f in res.files) {
                     if (f.search(/\.html$/g) >= 0) {
-                        $scope.html = res.files[f].content;
+                        $scope.origHtml = $scope.html = res.files[f].content;
                     }
                     if (f.search(/\.java$/g) >= 0) {
-                        $scope.java = res.files[f].content;
+                        $scope.origJava = $scope.java = res.files[f].content;
                     }
                 }
                 $scope.classes = null;
@@ -369,6 +379,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.$apply("");
             }
         }
+        $scope.classes = null;
         localStorage.gistid = $scope.gistid;
         localStorage.java = $scope.java;
         localStorage.html = $scope.html;

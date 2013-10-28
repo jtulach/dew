@@ -69,3 +69,7 @@
     /* color: #822; */
 }
 
+.btn:disabled {
+    background-color: gray;
+}
+
