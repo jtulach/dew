@@ -244,7 +244,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         $scope.java = "package waiting4gist;\nclass ToLoad {\n  /* please wait ... */\n}\n";
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://api.github.com/gists/" + $scope.gistid);
-        xhr.responseType = "json";
+/*        xhr.responseType = "json"; */
         xhr.send();
         xhr.onreadystatechange = function(ev) {
             if (xhr.readyState !== 4) {
@@ -312,7 +312,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         };
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://api.github.com/users/jtulach/gists");
-        xhr.responseType = "json";
+/*        xhr.responseType = "json"; */
         xhr.send();
         xhr.onreadystatechange = function(ev) {
             if (xhr.readyState !== 4) {

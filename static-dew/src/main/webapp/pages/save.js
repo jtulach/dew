@@ -85,7 +85,7 @@ function updateGist(token, reply) {
 function getGist(token, id, reply) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "https://api.github.com/gists/" + id + "?access_token=" + token);
-    xhr.responseType = "json";
+/*    xhr.responseType = "json"; */
     xhr.send();
     xhr.onreadystatechange = function(ev) {
       if (xhr.readyState !== 4) {
@@ -102,7 +102,7 @@ function getGist(token, id, reply) {
 function forkGist(token, id, reply) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "https://api.github.com/gists/" + id + "/forks?access_token=" + token);
-    xhr.responseType = "json";
+/*    xhr.responseType = "json"; */
     xhr.send();
     xhr.onreadystatechange = function(ev) {
       if (xhr.readyState !== 4) {
@@ -121,7 +121,7 @@ function forkGist(token, id, reply) {
 function getUser(token, reply) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "https://api.github.com/user" + "?access_token=" + token);
-    xhr.responseType = "json";
+/*    xhr.responseType = "json"; */
     xhr.send();
     xhr.onreadystatechange = function(ev) {
       if (xhr.readyState !== 4) {
