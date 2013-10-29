@@ -1,124 +1,12 @@
-<!--
-
-    Development Environment for Web
-    Copyright (C) 2012-2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 2 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program. Look for COPYING file in the top folder.
-    If not, see http://opensource.org/licenses/GPL-2.0.
-
--->
 <!DOCTYPE html>
-<html lang="en" ng-app="bck2brwsr" ng-controller="DevCtrl">
+<html>
     <head>
         <title>DEW</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="css/bootstrap-combined.min.css"/>  
-        <link rel="stylesheet" href="js/codemirror/codemirror.css">
-        <link rel="stylesheet" href="js/codemirror/theme/elegant.css"/>
-        <link rel="stylesheet" href="css/app.css"/>
     </head>
     <body>
-                
-        <div class="navbar navbar-fixed-top" style="width: 100%"> 
-        <div class="navbar-inner" style="padding-left: 12px; padding-right: 12px;">
-            <a class="brand" style="font-size: 100%" href="http://github.com/jtulach/dew/" target="_blank">
-                DEW 4 Java in a Brwsr
-            </a>
-            <span class="text-info"><b ng-bind="description">Loading gist ...</b>
-            </span>
-            (<a class="text-info" ng-href="{{url}}" ng-bind="gistid" target="_blank"></a>)
-            <form class="navbar-form pull-right">
-                <!-- select class="span2"></select -->
-                <button ng-click="save()" class="btn btn-warning">Save</button>
-                <button ng-click="run()" ng-hide="noClasses()" class="btn btn-warning">Run</button>
-            </form>
-            <ul class="nav">                          
-                <li>
-                    <select class="btn-small" ng-change="loadGist()" 
-                            ng-model="gistid" 
-                            ng-options="s.id as s.id + ': ' + s.description for s in samples" 
-                            ng-required >
-                    </select>
-                </li>
-            </ul>
-            <!-- form class="form form-horizontal pull-right">
-                <button class="btn btn-warning btn-small pull-right top" ng-click="post()">Rebuild</button>
-            </form -->
-            <!-- ul class="nav pull-right">
-                
-            </ul-->     
-        </div>  
-        </div>
-
-        <div class="container-fluid">        
-        
-        <div style="height: 4em;">&nbsp;</div>    
-            
-        <div class="row-fluid">
-            <div class="span6" style="margin-bottom: 10px;"> 
-                <table class="table table-condensed" style="margin-bottom: 2px">
-                <tr><td><i class="ic-html5"></i> HTML5</td></tr>               
-                </table>
-                <div>
-                    <textarea ui-codemirror='{ lineNumbers : true, mode : "xml", theme : "elegant", matchBrackets : true, lineWrapping : true }' ng-model="html"></textarea>
-                    <div class="alert alert-error" ng-show="doc.modelError">
-                        <small>{{doc.modelError.toString()}}</small>
-                    </div>
-                </div>    
-            </div>
-            
-            <div class="span6">  
-                <table class="table table-condensed" style="margin-bottom: 2px">
-                <tr><td><i class="ic-java"></i> Java</td></tr>               
-                </table>                
-                <div>
-                    <textarea id="editorJava" ui-codemirror='{ lineNumbers : true, mode : "text/x-java", theme : "elegant", matchBrackets : true, lineWrapping : true, gutters: ["CodeMirror-linenumbers", "issues"] }' ng-model="java"></textarea>
-                    <div class="alert alert-error" ng-show="doc.modelError">
-                        <small>{{doc.modelError.toString()}}</small>
-                    </div>
-                </div>
-            </div>
-        
-        </div>    
-            
-        <table class="table table-condensed">
-            <tr ng-click="gotoError(e.line, e.col)" ng-repeat="e in errors" ng-class="errorClass(e.kind)">
-                <td style="text-align: right">{{e.line}}</td> 
-                <td>:</td> 
-                <td style="text-align: left">{{e.col}}</td> 
-                <td width="100%" class="text-error error-hover">{{e.msg}} <i class="icon-play"/></td>
-            </tr>            
-        </table>    
-
-        <div class="show" ng-bind="status"></div>
-        
-        <div>&nbsp;</div>    
-            
-        <ul class="nav nav-tabs">
-            <li ng-class="'active'"><a href="#">Result</a></li>
-        </ul>    
-        
-        <div id="result"></div>
-        
-        </div>
-        
-        <script src="js/angular/angular.min.js"></script>
-        <script src="js/codemirror/codemirror.js"></script>
-        <script src="js/codemirror/mode/xml.js"></script>
-        <script src="js/codemirror/mode/clike.js"></script>
-        <script src="js/app.js"></script>
-        <script src="js/gist.js"></script>
-        <script id="brwsrvm"></script>
+        Moved to <a href="http://dew.apidesign.org/dew">apidesign web site</a>.
+        <script type="text/javascript">
+        window.location.href = "http://dew.apidesign.org/dew";
+        </script>
     </body>
 </html>
