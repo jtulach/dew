@@ -30,8 +30,12 @@ function initCompiler(port) {
 
     port.postMessage({ "status" : "Ready!", classes : [], "errors" : [] });
     port.onmessage = function(ev) {
-        var res = window.javac.compile(ev.data.html, ev.data.java);
-        res = eval("(" + res.toString() + ")");
-        port.postMessage(res);
+        try {
+            var res = window.javac.compile(ev.data.html, ev.data.java);
+            res = eval("(" + res.toString() + ")");
+            port.postMessage(res);
+        } catch (err) {
+            port.postMessage({ "status" : "Error running compiler: " + err, classes : [], "errors" : [] });
+        }
     };
 }
