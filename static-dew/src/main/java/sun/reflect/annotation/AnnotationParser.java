@@ -200,7 +200,7 @@ public class AnnotationParser {
                 annotationClass = (Class<? extends Annotation>)parseSig(sig, container);
             } catch (IllegalArgumentException ex) {
                 // support obsolete early jsr175 format class files
-                annotationClass = constPool.getClassAt(typeIndex);
+                annotationClass = (Class<? extends Annotation>) constPool.getClassAt(typeIndex);
             }
         } catch (NoClassDefFoundError e) {
             if (exceptionOnMissingAnnotationClass)
