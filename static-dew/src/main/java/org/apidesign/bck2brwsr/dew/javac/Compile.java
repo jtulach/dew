@@ -17,73 +17,43 @@
  */
 package org.apidesign.bck2brwsr.dew.javac;
 
+import org.apidesign.bck2brwsr.dew.nbjava.CompilationInfo;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.tools.Diagnostic;
-import javax.tools.DiagnosticListener;
 import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
+import org.apidesign.bck2brwsr.dew.nbjava.JavaCompletionQuery;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class Compile implements DiagnosticListener<JavaFileObject> {
-    private final List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
-    private final Map<String, byte[]> classes;
+final class Compile {
+
     private final String pkg;
     private final String cls;
     private final String html;
-
+    private final ClassLoaderFileManager clfm;
+    private final CompilationInfo info;
+    private Map<String, byte[]> classes = null;
+    private List<Diagnostic<? extends JavaFileObject>> errors;
+    
     private Compile(String html, String code) throws IOException {
         this.pkg = find("package", ';', code);
         this.cls = find("class ", ' ', code);
-        this.html = html;
-        classes = compile(html, code);
-    }
-
-    /** Performs compilation of given HTML page and associated Java code
-     */
-    public static Compile create(String html, String code) throws IOException {
-        return new Compile(html, code);
-    }
-    
-    /** Checks for given class among compiled resources */
-    public byte[] get(String res) {
-        return classes.get(res);
-    }
-    
-    public Map<String, byte[]> getClasses() {
-        return classes;
-    }
-    public boolean isMainClass(String name) {
-        return name.endsWith('/' + cls + ".class");
-    }
-    
-    /** Obtains errors created during compilation.
-     */
-    public List<Diagnostic<? extends JavaFileObject>> getErrors() {
-        List<Diagnostic<? extends JavaFileObject>> err = new ArrayList<>();
-        for (Diagnostic<? extends JavaFileObject> diagnostic : errors) {
-            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-                err.add(diagnostic);
-            }
-        }
-        return err;
-    }
-    
-    private Map<String, byte[]> compile(final String html, final String code) throws IOException {
-        final ClassLoaderFileManager clfm = new ClassLoaderFileManager();
-        final JavaFileObject file = clfm.createMemoryFileObject(
+        this.html = html;        
+        this.clfm = new ClassLoaderFileManager();
+        
+        final JavaFileObject file = clfm.createMemoryFileObject(                
                 ClassLoaderFileManager.convertFQNToResource(pkg.isEmpty() ? cls : pkg + "." + cls) + Kind.SOURCE.extension,
                 Kind.SOURCE,
                 code.getBytes());
@@ -104,19 +74,63 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             }
         };
 
-        final Boolean res = ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", "1.7", "-target", "1.7"), null, Arrays.asList(file)).call();
-        Map<String, byte[]> result = new HashMap<>();
-        for (MemoryFileObject generated : clfm.getGeneratedFiles(Kind.CLASS)) {
-            result.put(generated.getName(), generated.getContent());
+        this.info = new CompilationInfo(file, jfm);
+    }
+
+    /** Performs compilation of given HTML page and associated Java code
+     */
+    public static Compile create(String html, String code) throws IOException {
+        return new Compile(html, code);
+    }
+
+    public List<? extends String> getCompletions(int offset) {
+        try {
+            return JavaCompletionQuery.query(info, JavaCompletionQuery.COMPLETION_QUERY_TYPE, offset);
+        } catch (Exception e) {}
+        return Collections.emptyList();
+    }
+
+    /** Checks for given class among compiled resources */
+    public byte[] get(String res) {
+        return getClasses().get(res);
+    }
+
+    public Map<String, byte[]> getClasses() {
+        if (classes == null) {
+            compile();
         }
-        return result;
+        return classes;
     }
 
-
-    @Override
-    public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
-        errors.add(diagnostic);
+    public boolean isMainClass(String name) {
+        return name.endsWith('/' + cls + ".class");
     }
+
+    /** Obtains errors created during compilation.
+     */
+    public List<Diagnostic<? extends JavaFileObject>> getErrors() {
+        if (errors == null) {
+            compile();
+        }
+        return errors;
+    }
+
+    private void compile() {
+        classes = new HashMap<>();
+        errors = new ArrayList<>();
+        try {
+            info.toPhase(CompilationInfo.Phase.GENERATED);
+        } catch (IOException ioe) {}
+        for (MemoryFileObject generated : clfm.getGeneratedFiles(Kind.CLASS)) {
+            classes.put(generated.getName(), generated.getContent());
+        }
+        for (Diagnostic<? extends JavaFileObject> diagnostic : info.getDiagnostics()) {
+            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                errors.add(diagnostic);
+            }
+        }
+    }
+
     private static String find(String pref, char term, String java) throws IOException {
         int pkg = java.indexOf(pref);
         if (pkg != -1) {
@@ -141,7 +155,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     @Override
     public String toString() {
         if (getErrors().isEmpty()) {
-            return "Compiled: " + classes.keySet();
+            return "Compiled: " + getClasses().keySet();
         } else {
             return "Compiled with errors: " + getErrors();
         }

@@ -95,9 +95,8 @@
                   <excludes>
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
-                       <exclude>static-dew/src/main/java/javax/**</exclude>
-                       <exclude>static-dew/src/main/java/com/sun/**</exclude>
-                       <exclude>static-dew/src/main/resources/com/sun/**</exclude>
+                       <exclude>static-dew/src/main/java/sun/**</exclude>
+                       <exclude>static-dew/src/main/java/org/apidesign/bck2brwsr/dew/nbjava/**</exclude>
                        <exclude>**/js/codemirror/**</exclude>
                        <exclude>**/js/angular/**</exclude>
                        <exclude>**/css/bootstrap*</exclude>

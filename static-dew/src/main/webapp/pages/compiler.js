@@ -31,7 +31,7 @@ function initCompiler(port) {
     port.postMessage({ "status" : "Ready!", classes : [], "errors" : [] });
     port.onmessage = function(ev) {
         try {
-            var res = window.javac.compile(ev.data.html, ev.data.java);
+            var res = window.javac.compile(ev.data.type, ev.data.html, ev.data.java, ev.data.offset);
             res = eval("(" + res.toString() + ")");
             port.postMessage(res);
         } catch (err) {

@@ -46,20 +46,22 @@ public final class Main {
 
     @JavaScriptBody(args = {}, javacall = true, body = 
         "window.javac = {};\n"
-      + "window.javac.compile = function(html,java) {\n"
-      + "  return @org.apidesign.bck2brwsr.dew.javac.Main::doCompile(Ljava/lang/String;Ljava/lang/String;)(html,java);\n"
+      + "window.javac.compile = function(type,html,java,offset) {\n"
+      + "  return @org.apidesign.bck2brwsr.dew.javac.Main::doCompile(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)(type,html,java,offset);\n"
       + "}\n"
     )
     private static void registerJavacService() {
     }
     
-    static JavacResult doCompile(String html, String java) throws IOException {
-        Compile c = Compile.create(html, java);
-        LOG.log(Level.INFO, "Compiled {0}", c);
+    static JavacResult doCompile(String type, String html, String java, int offset) throws IOException {
         JavacResult res = new JavacResult();
-        for (Diagnostic<? extends JavaFileObject> d : c.getErrors()) {
-            res.getErrors().add(JavacErrorModel.create(d));
+        res.setType(type);
+        Compile c = Compile.create(html, java);
+        if ("autocomplete".equals(type)) {
+            res.getCompletions().addAll(c.getCompletions(offset));
+            return res;
         }
+        LOG.log(Level.INFO, "Compiled {0}", c);
         for (Map.Entry<String, byte[]> e : c.getClasses().entrySet()) {
             List<Byte> arr = new ArrayList<>(e.getValue().length);
             for (byte b : e.getValue()) {
@@ -72,6 +74,9 @@ public final class Main {
             } else {
                 res.getClasses().add(jc);
             }
+        }
+        for (Diagnostic<? extends JavaFileObject> d : c.getErrors()) {
+            res.getErrors().add(JavacErrorModel.create(d));
         }
         if (!res.getErrors().isEmpty()) {
             res.setStatus("There are errors!");
@@ -88,9 +93,11 @@ public final class Main {
     }
     
     @Model(className = "JavacResult", properties = {
+        @Property(name = "type", type = String.class),
         @Property(name = "status", type = String.class),
         @Property(name = "errors", type = JavacError.class, array = true),
-        @Property(name = "classes", type = JavacClass.class, array = true)
+        @Property(name = "classes", type = JavacClass.class, array = true),
+        @Property(name = "completions", type = String.class, array = true)
     })
     static final class JavacResultModel {
     }

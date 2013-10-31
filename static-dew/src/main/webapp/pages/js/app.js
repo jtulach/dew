@@ -349,10 +349,43 @@ function DevCtrl( $scope, $timeout, $http ) {
         var w = new SharedWorker('sharedcompiler.js', 'javac');
         $scope.javac = w.port;
     }
+
+    var JAVA_WORD = /[\w$]+/;
+    $scope.javaHint = function (editor, fn, options) {
+        var word = options && options.word || JAVA_WORD;
+        var cur = editor.getCursor(), curLine = editor.getLine(cur.line);
+        var start = cur.ch, end = start;
+        while (start && word.test(curLine.charAt(start - 1)))
+            --start;
+        var pref = start !== end && curLine.slice(start, end);
+        while (end < curLine.length && word.test(curLine.charAt(end)))
+            ++end;
+
+        $scope.pendingJavaHintInfo = {callback: fn, from: CodeMirror.Pos(cur.line, start), to: CodeMirror.Pos(cur.line, end), prefix: pref};
+        $scope.post('autocomplete');
+    };
+    CodeMirror.registerHelper("hint", "clike", $scope.javaHint);
+
     $scope.javac.onmessage = function(ev) {
         var obj = ev.data;
         $scope.status = obj.status;
-        if (obj.classes && obj.classes.length > 0) {
+        if (obj.type === 'autocomplete') {
+            if ($scope.pendingJavaHintInfo && obj.completions) {
+                var list;
+                if ($scope.pendingJavaHintInfo.prefix) {
+                    var pref = $scope.pendingJavaHintInfo.prefix;
+                    list = [];
+                    for(var i = 0; i < obj.completions.length; ++i) {
+                        if (obj.completions[i].slice(0, pref.length) === pref)
+                            list[list.length] = obj.completions[i];
+                    }
+                } else {
+                    list = obj.completions;
+                }
+                $scope.pendingJavaHintInfo.callback({list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to});
+            }
+            $scope.pendingJavaHintInfo = null;
+        } else if (obj.classes && obj.classes.length > 0) {
             $scope.classes = obj.classes;
             $scope.errors = null;
             var editor = document.getElementById("editorJava").codeMirror;   
@@ -368,11 +401,14 @@ function DevCtrl( $scope, $timeout, $http ) {
         }
         $scope.$apply("");
     };
-    $scope.post = function() {
+    $scope.post = function(t) {
+        t = t || 'compile';
         if ($scope.javac.running) {
             $scope.javac.pending = true;
         } else {
-            $scope.javac.postMessage({ html : $scope.html, java : $scope.java});
+            var editor = document.getElementById("editorJava").codeMirror;
+            var off = editor.indexFromPos(t === 'autocomplete' ? $scope.pendingJavaHintInfo.from : editor.getCursor());
+            $scope.javac.postMessage({ type : t, html : $scope.html, java : $scope.java, offset : off});
             $scope.javac.running = true;
             if ($scope.status.indexOf('Init') < 0) {
                 $scope.status = 'Compiling...';
@@ -385,7 +421,10 @@ function DevCtrl( $scope, $timeout, $http ) {
         localStorage.html = $scope.html;
     };
 
-    
+    CodeMirror.commands.autocomplete = function(cm) {
+        CodeMirror.showHint(cm, null, {async: true});
+    };
+
     $scope.$watch( "html", $scope.debounce( $scope.post, 500 ) );
     $scope.$watch( "java", $scope.debounce( $scope.post, 500 ) );
 

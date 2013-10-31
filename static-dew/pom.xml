@@ -168,6 +168,16 @@
       <version>${net.java.html.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+        <groupId>org.netbeans.external</groupId>
+        <artifactId>nb-javac-api</artifactId>
+        <version>RELEASE74</version>
+    </dependency>
+    <dependency>
+        <groupId>org.netbeans.external</groupId>
+        <artifactId>nb-javac-impl</artifactId>
+        <version>RELEASE74</version>
+    </dependency>
   </dependencies>
   <profiles>
       <profile>
