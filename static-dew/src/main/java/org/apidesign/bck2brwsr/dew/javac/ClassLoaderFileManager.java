@@ -38,7 +38,8 @@ import java.util.zip.ZipFile;
 import javax.tools.FileObject;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
+
+import static javax.tools.StandardLocation.*;
 
 /**
  *
@@ -47,18 +48,18 @@ import javax.tools.StandardLocation;
 public class ClassLoaderFileManager implements JavaFileManager {
 
     private static final Location[] READ_LOCATIONS = {
-        StandardLocation.PLATFORM_CLASS_PATH,
-        StandardLocation.CLASS_PATH,
-        StandardLocation.SOURCE_PATH
+        PLATFORM_CLASS_PATH,
+        CLASS_PATH,
+        SOURCE_PATH
     };
 
     private static final Location[] WRITE_LOCATIONS = {
-        StandardLocation.CLASS_OUTPUT,
-        StandardLocation.SOURCE_OUTPUT
+        CLASS_OUTPUT,
+        SOURCE_OUTPUT
     };
 
     private static final Location[] CLASS_LOADER_LOCATIONS = {
-        StandardLocation.ANNOTATION_PROCESSOR_PATH
+        ANNOTATION_PROCESSOR_PATH
     };
 
     private Map<Location, Map<String,List<MemoryFileObject>>> generated;
@@ -90,7 +91,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
          * and SOURCE_OUTPUT for AnnotationProcessors
          *
          */
-        if (location == StandardLocation.PLATFORM_CLASS_PATH /*canRead(location)*/) {
+        if (location == PLATFORM_CLASS_PATH /*canRead(location)*/) {
             final List<JavaFileObject> res = new ArrayList<JavaFileObject>();
             for (String resource : getResources(convertFQNToResource(packageName))) {
                 final JavaFileObject jfo = new ClassLoaderJavaFileObject(resource);
@@ -132,12 +133,12 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public boolean hasLocation(Location location) {
-        for (Location l : StandardLocation.values()) {
-            if (l.equals(location)) {
-                return true;
-            }
-        }
-        return false;
+        return
+            location == CLASS_OUTPUT ||
+            location == CLASS_PATH ||
+            location == SOURCE_PATH ||
+            location == ANNOTATION_PROCESSOR_PATH ||
+            location == PLATFORM_CLASS_PATH;
     }
 
     @Override
@@ -145,7 +146,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         if (canRead(location)) {
             return new ClassLoaderJavaFileObject(convertFQNToResource(className) + kind.extension);
         } else {
-            throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
+            throw new UnsupportedOperationException("Unsupported location for reading java file: " + location);   //NOI18N
         }
     }
 
@@ -157,7 +158,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             register(location, resource, res);
             return res;
         } else {
-            throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
+            throw new UnsupportedOperationException("Unsupported location for writing java : " + location);   //NOI18N
         }
     }
 
@@ -171,7 +172,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             resource.append(relativeName);
             return new ClassLoaderJavaFileObject(resource.toString());
         } else {
-            throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
+            throw new UnsupportedOperationException("Unsupported location for reading file: " + location);   //NOI18N
         }
     }
 
@@ -188,7 +189,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             register(location, resourceStr, res);
             return res;
         } else {
-            throw new UnsupportedOperationException("Unsupported location for reading: " + location);   //NOI18N
+            throw new UnsupportedOperationException("Unsupported location for writing file: " + location);   //NOI18N
         }
     }
 
