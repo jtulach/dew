@@ -36,6 +36,7 @@ import net.java.html.json.Property;
  */
 public final class Main {
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
+    private static Compile c = null;
     
     static {
         LOG.info("Registering Javac");
@@ -56,39 +57,40 @@ public final class Main {
     static JavacResult doCompile(String type, String html, String java, int offset) throws IOException {
         JavacResult res = new JavacResult();
         res.setType(type);
-        Compile c = Compile.create(html, java);
-        if ("autocomplete".equals(type)) {
-            res.getCompletions().addAll(c.getCompletions(offset));
-            return res;
+        if (c == null || !java.equals(c.getJava())) {
+            c = Compile.create(html, java);
         }
-        LOG.log(Level.INFO, "Compiled {0}", c);
-        for (Map.Entry<String, byte[]> e : c.getClasses().entrySet()) {
-            List<Byte> arr = new ArrayList<>(e.getValue().length);
-            for (byte b : e.getValue()) {
-                arr.add(b);
-            }
-            final JavacClass jc = new JavacClass(e.getKey());
-            jc.getByteCode().addAll(arr);
-            if (c.isMainClass(e.getKey())) {
-                res.getClasses().add(0, jc);
-            } else {
-                res.getClasses().add(jc);
-            }
+        switch (type) {
+            case "autocomplete":
+                LOG.info("Autocomplete");
+                res.getCompletions().addAll(c.getCompletions(offset));
+                res.setStatus("Autocomplete finished.");
+                return res;
+            case "checkForErrors":
+                for (Diagnostic<? extends JavaFileObject> d : c.getErrors()) {
+                    res.getErrors().add(JavacErrorModel.create(d));
+                }
+                res.setStatus(res.getErrors().isEmpty() ? "OK. No errors found." : "There are errors!");
+                return res;
+            case "compile":
+                LOG.log(Level.INFO, "Compiled {0}", c);
+                for (Map.Entry<String, byte[]> e : c.getClasses().entrySet()) {
+                    List<Byte> arr = new ArrayList<>(e.getValue().length);
+                    for (byte b : e.getValue()) {
+                        arr.add(b);
+                    }
+                    final JavacClass jc = new JavacClass(e.getKey());
+                    jc.getByteCode().addAll(arr);
+                    if (c.isMainClass(e.getKey())) {
+                        res.getClasses().add(0, jc);
+                    } else {
+                        res.getClasses().add(jc);
+                    }
+                }
+                res.setStatus(res.getClasses().isEmpty() ? "No bytecode has been generated!" : "OK");
+                return res;
         }
-        for (Diagnostic<? extends JavaFileObject> d : c.getErrors()) {
-            res.getErrors().add(JavacErrorModel.create(d));
-        }
-        if (!res.getErrors().isEmpty()) {
-            res.setStatus("There are errors!");
-        } else if (res.getClasses().isEmpty()) {
-            res.setStatus("No bytecode has been generated.");
-        } else {
-            if (res.getClasses().size() == 1) {
-                res.setStatus("OK. The class has been generated. You can run it now.");
-            } else {
-                res.setStatus("OK. " + res.getClasses().size() + " classes have been generated. You can run them now.");
-            }
-        }
+        res.setStatus("Nothing to do!");
         return res;
     }
     

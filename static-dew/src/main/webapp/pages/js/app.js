@@ -124,15 +124,15 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.debounce = function(func, wait, immediate) {
       var timeout, result;
       return function() {
-        var context = this, args = arguments;
+        var context = this;
         var later = function() {
           timeout = null;
-          if (!immediate) result = func.apply(context, args);
+          if (!immediate) result = func.apply(context);
         };
         var callNow = immediate && !timeout;
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
-        if (callNow) result = func.apply(context, args);
+        if (callNow) result = func.apply(context);
         return result;
       };
     };
@@ -402,7 +402,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         $scope.$apply("");
     };
     $scope.post = function(t) {
-        t = t || 'compile';
+        t = t || 'checkForErrors';
         if ($scope.javac.running) {
             $scope.javac.pending = true;
         } else {

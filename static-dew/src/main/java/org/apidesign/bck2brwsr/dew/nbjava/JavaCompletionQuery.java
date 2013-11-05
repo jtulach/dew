@@ -84,6 +84,7 @@ public final class JavaCompletionQuery {
     private static final String DOT = "."; //NOI18N
     private static final String COMMA = ","; //NOI18N
     private static final String COLON = ":"; //NOI18N
+    private static final String COLONCOLON = "::"; //NOI18N
     private static final String SEMI = ";"; //NOI18N
     private static final String LPAREN = "("; //NOI18N
     private static final String RPAREN = ")"; //NOI18N
@@ -96,6 +97,7 @@ public final class JavaCompletionQuery {
     private static final String GT = ">"; //NOI18N
     private static final String GTGT = ">>"; //NOI18N
     private static final String GTGTGT = ">>>"; //NOI18N
+    private static final String ARROW = "->"; //NOI18N    
     private static final String ELLIPSIS = "..."; //NOI18N
     private static final String AT = "@"; //NOI18N
     private static final String AMP = "&"; //NOI18N
@@ -234,12 +236,12 @@ public final class JavaCompletionQuery {
                 insideModifiers(env, path);
                 break;
             case ANNOTATION:
-//            case TYPE_ANNOTATION:
+            case TYPE_ANNOTATION:
                 insideAnnotation(env);
                 break;
-//            case ANNOTATED_TYPE:
-//                insideAnnotatedType(env);
-//                break;
+            case ANNOTATED_TYPE:
+                insideAnnotatedType(env);
+                break;
             case TYPE_PARAMETER:
                 insideTypeParameter(env);
                 break;
@@ -259,12 +261,12 @@ public final class JavaCompletionQuery {
             case MEMBER_SELECT:
                 insideMemberSelect(env);
                 break;
-//            case MEMBER_REFERENCE:
-//                insideMemberReference(env);
-//                break;
-//            case LAMBDA_EXPRESSION:
-//                insideLambdaExpression(env);
-//                break;
+            case MEMBER_REFERENCE:
+                insideMemberReference(env);
+                break;
+            case LAMBDA_EXPRESSION:
+                insideLambdaExpression(env);
+                break;
             case METHOD_INVOCATION:
                 insideMethodInvocation(env);
                 break;
@@ -933,19 +935,19 @@ public final class JavaCompletionQuery {
             }
         }
     }
-//
-//    private void insideAnnotatedType(Env env) throws IOException {
-//        int offset = env.getOffset();
-//        AnnotatedTypeTree att = (AnnotatedTypeTree)env.getPath().getLeaf();
-//        SourcePositions sourcePositions = env.getSourcePositions();
-//        CompilationUnitTree root = env.getRoot();
-//        int pos = (int)sourcePositions.getStartPosition(root, att.getUnderlyingType());
-//        if (pos >= 0 && pos < offset) {
-//            insideExpression(env, new TreePath(env.getPath(), att.getUnderlyingType()));
-//        } else {
-//            addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
-//        }
-//    }
+
+    private void insideAnnotatedType(Env env) throws IOException {
+        int offset = env.getOffset();
+        AnnotatedTypeTree att = (AnnotatedTypeTree)env.getPath().getLeaf();
+        SourcePositions sourcePositions = env.getSourcePositions();
+        CompilationUnitTree root = env.getRoot();
+        int pos = (int)sourcePositions.getStartPosition(root, att.getUnderlyingType());
+        if (pos >= 0 && pos < offset) {
+            insideExpression(env, new TreePath(env.getPath(), att.getUnderlyingType()));
+        } else {
+            addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
+        }
+    }
 
     private void insideAnnotationAttribute(Env env, TreePath annotationPath, Name attributeName) throws IOException {
         CompilationInfo info = env.getInfo();
@@ -1171,17 +1173,17 @@ public final class JavaCompletionQuery {
         boolean afterDot = false;
         boolean afterLt = false;
         int openLtNum = 0;
-        String lastNonWhitespaceToken = null;
+        Pair<String, Integer> lastNonWhitespaceToken = null;
         ListIterator<? extends Pair<String, Integer>> ts = findFirstNonWhitespaceToken(env, expEndPos, offset);
         while (ts != null && ts.hasNext()) {
-            lastNonWhitespaceToken = ts.next().first;
-            switch (lastNonWhitespaceToken) {
+            lastNonWhitespaceToken = ts.next();
+            switch (lastNonWhitespaceToken.first) {
                 case DOUBLELITERAL:
                 case FLOATLITERAL:
                 case LONGLITERAL:
                 case ELLIPSIS:
-//                    if (ts.offset() != expEndPos || ts.token().text().charAt(0) != '.')
-//                        break;
+                    if (lastNonWhitespaceToken.second != expEndPos || lastNonWhitespaceToken.first.charAt(0) != '.')
+                        break;
                 case DOT:
                     afterDot = true;
                     break;
@@ -1206,7 +1208,7 @@ public final class JavaCompletionQuery {
             return;
         }
         if (openLtNum > 0) {
-            switch (lastNonWhitespaceToken) {
+            switch (lastNonWhitespaceToken.first) {
                 case QUESTION:
                     addKeyword(env, EXTENDS_KEYWORD, SPACE, false);
                     addKeyword(env, SUPER_KEYWORD, SPACE, false);
@@ -1218,7 +1220,7 @@ public final class JavaCompletionQuery {
                     addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
                     break;
             }
-        } else if (!STAR.equals(lastNonWhitespaceToken)) {
+        } else if (!STAR.equals(lastNonWhitespaceToken.first)) {
             info.toPhase(Phase.RESOLVED);
             TreePath parentPath = path.getParentPath();
             Tree parent = parentPath != null ? parentPath.getLeaf() : null;
@@ -1390,12 +1392,12 @@ public final class JavaCompletionQuery {
                         }
                         Element el = info.getTrees().getElement(expPath);
                         if (el != null && (el.getKind().isClass() || el.getKind().isInterface())) {
-//                            if (parent.getKind() == Tree.Kind.NEW_CLASS && ((NewClassTree)parent).getIdentifier() == fa && prefix != null) {
-//                                String typeName = Utilities.getElementName(el, true) + "." + prefix; //NOI18N
-//                                TypeMirror tm = info.getTreeUtilities().parseType(typeName, env.getScope().getEnclosingClass());
-//                                if (tm != null && tm.getKind() == TypeKind.DECLARED)
-//                                    addMembers(env, tm, ((DeclaredType)tm).asElement(), EnumSet.of(CONSTRUCTOR), null, inImport, insideNew, false);
-//                            }
+                            if (parent.getKind() == Tree.Kind.NEW_CLASS && ((NewClassTree)parent).getIdentifier() == fa && prefix != null) {
+                                String typeName = Utilities.getElementName(info, el, true) + "." + prefix; //NOI18N
+                                TypeMirror tm = info.getTreeUtilities().parseType(typeName, env.getScope().getEnclosingClass());
+                                if (tm != null && tm.getKind() == TypeKind.DECLARED)
+                                    addMembers(env, tm, ((DeclaredType)tm).asElement(), EnumSet.of(CONSTRUCTOR), null, inImport, insideNew, false);
+                            }
                         }
                         if (exs != null && !exs.isEmpty()) {
                             Elements elements = info.getElements();
@@ -1430,12 +1432,12 @@ public final class JavaCompletionQuery {
                             el = info.getElements().getPackageElement(((TypeElement)el).getQualifiedName());
                         }
                         if (el != null && el.getKind() == PACKAGE) {                                
-//                            if (parent.getKind() == Tree.Kind.NEW_CLASS && ((NewClassTree)parent).getIdentifier() == fa && prefix != null) {
-//                                String typeName = Utilities.getElementName(el, true) + "." + prefix; //NOI18N
-//                                TypeMirror tm = info.getTreeUtilities().parseType(typeName, env.getScope().getEnclosingClass());
-//                                if (tm != null && tm.getKind() == TypeKind.DECLARED)
-//                                    addMembers(env, tm, ((DeclaredType)tm).asElement(), EnumSet.of(CONSTRUCTOR), null, inImport, insideNew, false);
-//                            }
+                            if (parent.getKind() == Tree.Kind.NEW_CLASS && ((NewClassTree)parent).getIdentifier() == fa && prefix != null) {
+                                String typeName = Utilities.getElementName(info, el, true) + "." + prefix; //NOI18N
+                                TypeMirror tm = info.getTreeUtilities().parseType(typeName, env.getScope().getEnclosingClass());
+                                if (tm != null && tm.getKind() == TypeKind.DECLARED)
+                                    addMembers(env, tm, ((DeclaredType)tm).asElement(), EnumSet.of(CONSTRUCTOR), null, inImport, insideNew, false);
+                            }
                             if (exs != null && !exs.isEmpty()) {
                                 Elements elements = info.getElements();
                                 for (TypeMirror ex : exs)
@@ -1472,79 +1474,80 @@ public final class JavaCompletionQuery {
         }
     }
 
-//    private void insideMemberReference(Env env) throws IOException {
-//        TreePath path = env.getPath();
-//        MemberReferenceTree mr = (MemberReferenceTree)path.getLeaf();
-//        TokenSequence<JavaTokenId> ts = findLastNonWhitespaceToken(env, mr, env.getOffset());
-//        if (ts != null) {
-//            switch (ts.token().id()) {
-//                case COLONCOLON:
-//                case GT:
-//                case GTGT:
-//                case GTGTGT:
-//                    CompilationController controller = env.getController();
-//                    ExpressionTree exp = mr.getQualifierExpression();
-//                    TreePath expPath = new TreePath(path, exp);
-//                    Trees trees = controller.getTrees();
-//                    TypeMirror type = trees.getTypeMirror(expPath);
-//                    if (type != null && type.getKind() == TypeKind.TYPEVAR) {
-//                        while(type != null && type.getKind() == TypeKind.TYPEVAR) {
-//                            type = ((TypeVariable)type).getUpperBound();
-//                        }
-//                        if (type != null) {
-//                            type = controller.getTypes().capture(type);
-//                        }
-//                    }
-//                    if (type != null && (type.getKind() == TypeKind.DECLARED
-//                            || type.getKind() == TypeKind.ARRAY || type.getKind() == TypeKind.TYPEVAR)) {
-//                        Element e = trees.getElement(expPath);
-//                        addMethodReferences(env, type, e);
-//                        if (e == null || e.getKind().isClass() || e.getKind().isInterface()) {
-//                            addKeyword(env, NEW_KEYWORD, SPACE, false);
-//                        }
-//                    }
-//                    break;
-//                case LT:
-//                case COMMA:
-//                    addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
-//                    break;
-//            }
-//        }
-//    }
-//
-//    private void insideLambdaExpression(Env env) throws IOException {
-//        TreePath path = env.getPath();
-//        LambdaExpressionTree let = (LambdaExpressionTree) path.getLeaf();
-//        TokenSequence<JavaTokenId> ts = findLastNonWhitespaceToken(env, let, env.getOffset());
-//        if (ts != null) {
-//            switch (ts.token().id()) {
-//                case ARROW:
-//                    localResult(env);
-//                    addValueKeywords(env);
-//                    break;
-//                case COMMA:
-//                    if (let.getParameters().isEmpty()
-//                            || env.getController().getTrees().getSourcePositions().getStartPosition(path.getCompilationUnit(), let.getParameters().get(0).getType()) >= 0) {
-//                        addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
-//                        addPrimitiveTypeKeywords(env);
-//                        addKeyword(env, FINAL_KEYWORD, SPACE, false);
-//                    }
-//                    break;
-//            }
-//        }
-//    }
+    private void insideMemberReference(Env env) throws IOException {
+        TreePath path = env.getPath();
+        MemberReferenceTree mr = (MemberReferenceTree)path.getLeaf();
+        ListIterator<? extends Pair<String, Integer>> ts = findLastNonWhitespaceToken(env, mr, env.getOffset());
+        String token = ts != null && ts.hasPrevious() ? ts.previous().first : null;
+        if (token != null) {
+            switch (token) {
+                case COLONCOLON:
+                case GT:
+                case GTGT:
+                case GTGTGT:
+                    CompilationInfo info = env.getInfo();
+                    ExpressionTree exp = mr.getQualifierExpression();
+                    TreePath expPath = new TreePath(path, exp);
+                    Trees trees = info.getTrees();
+                    TypeMirror type = trees.getTypeMirror(expPath);
+                    if (type != null && type.getKind() == TypeKind.TYPEVAR) {
+                        while(type != null && type.getKind() == TypeKind.TYPEVAR) {
+                            type = ((TypeVariable)type).getUpperBound();
+                        }
+                        if (type != null) {
+                            type = info.getTypes().capture(type);
+                        }
+                    }
+                    if (type != null && (type.getKind() == TypeKind.DECLARED
+                            || type.getKind() == TypeKind.ARRAY || type.getKind() == TypeKind.TYPEVAR)) {
+                        Element e = trees.getElement(expPath);
+                        addMethodReferences(env, type, e);
+                        if (e == null || e.getKind().isClass() || e.getKind().isInterface()) {
+                            addKeyword(env, NEW_KEYWORD, SPACE, false);
+                        }
+                    }
+                    break;
+                case LT:
+                case COMMA:
+                    addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
+                    break;
+            }
+        }
+    }
+
+    private void insideLambdaExpression(Env env) throws IOException {
+        TreePath path = env.getPath();
+        LambdaExpressionTree let = (LambdaExpressionTree) path.getLeaf();
+        ListIterator<? extends Pair<String, Integer>> ts = findLastNonWhitespaceToken(env, let, env.getOffset());
+        String token = ts != null && ts.hasPrevious() ? ts.previous().first : null;
+        if (token != null) {
+            switch (token) {
+                case ARROW:
+                    localResult(env);
+                    addValueKeywords(env);
+                    break;
+                case COMMA:
+                    if (let.getParameters().isEmpty()
+                            || env.getInfo().getTrees().getSourcePositions().getStartPosition(path.getCompilationUnit(), let.getParameters().get(0).getType()) >= 0) {
+                        addTypes(env, EnumSet.of(CLASS, INTERFACE, ENUM, ANNOTATION_TYPE, TYPE_PARAMETER), null);
+                        addPrimitiveTypeKeywords(env);
+                        addKeyword(env, FINAL_KEYWORD, SPACE, false);
+                    }
+                    break;
+            }
+        }
+    }
 
     private void insideMethodInvocation(Env env) throws IOException {
         TreePath path = env.getPath();
         MethodInvocationTree mi = (MethodInvocationTree)path.getLeaf();
         int offset = env.getOffset();
         ListIterator<? extends Pair<String, Integer>> ts = findLastNonWhitespaceToken(env, mi, offset);
-        String token = ts != null && ts.hasPrevious() ? ts.previous().first : null;
-        if (token == null || !(LPAREN.equals(token) || COMMA.equals(token))) {
+        Pair<String, Integer> token = ts != null && ts.hasPrevious() ? ts.previous() : null;
+        if (token == null || !(LPAREN.equals(token.first) || COMMA.equals(token.first))) {
             SourcePositions sp = env.getSourcePositions();
             CompilationUnitTree root = env.getRoot();
-//            int lastTokenEndOffset = ts.offset() + ts.token().length();
-            int lastTokenEndOffset = offset;
+            int lastTokenEndOffset = token.second + token.first.length();
             for (ExpressionTree arg : mi.getArguments()) {
                 int pos = (int)sp.getEndPosition(root, arg);
                 if (lastTokenEndOffset == pos) {
@@ -1580,16 +1583,16 @@ public final class JavaCompletionQuery {
                     DeclaredType base = path.getParentPath().getLeaf().getKind() == Tree.Kind.THROW && tel != null ?
                         info.getTypes().getDeclaredType(tel) : null;
                     TypeElement toExclude = null;
-//                    if (nc.getIdentifier().getKind() == Tree.Kind.IDENTIFIER && prefix != null) {
-//                        TypeMirror tm = info.getTreeUtilities().parseType(prefix, env.getScope().getEnclosingClass());
-//                        if (tm != null && tm.getKind() == TypeKind.DECLARED) {
-//                            TypeElement te = (TypeElement)((DeclaredType)tm).asElement();
-//                            addMembers(env, tm, te, EnumSet.of(CONSTRUCTOR), base, false, true, false);
-//                            if ((te.getTypeParameters().isEmpty() || SourceVersion.RELEASE_5.compareTo(info.getSourceVersion()) > 0)
-//                                    && !Utilities.hasAccessibleInnerClassConstructor(te, env.getScope(), info.getTrees()))
-//                                toExclude = te;
-//                        }
-//                    }
+                    if (nc.getIdentifier().getKind() == Tree.Kind.IDENTIFIER && prefix != null) {
+                        TypeMirror tm = info.getTreeUtilities().parseType(prefix, env.getScope().getEnclosingClass());
+                        if (tm != null && tm.getKind() == TypeKind.DECLARED) {
+                            TypeElement te = (TypeElement)((DeclaredType)tm).asElement();
+                            addMembers(env, tm, te, EnumSet.of(CONSTRUCTOR), base, false, true, false);
+                            if ((te.getTypeParameters().isEmpty() || SourceVersion.RELEASE_5.compareTo(info.getSourceVersion()) > 0)
+                                    && !Utilities.hasAccessibleInnerClassConstructor(te, env.getScope(), info.getTrees()))
+                                toExclude = te;
+                        }
+                    }
                     boolean insideNew = true;
                     ExpressionTree encl = nc.getEnclosingExpression();
                     if (queryType == COMPLETION_QUERY_TYPE) {
@@ -2275,10 +2278,10 @@ public final class JavaCompletionQuery {
                 varKind = varEl.getKind();
             }
         }
-//        if (et.getKind() == Tree.Kind.ANNOTATED_TYPE) {
-//            et = ((AnnotatedTypeTree)et).getUnderlyingType();
-//            exPath = new TreePath(exPath, et);
-//        }
+        if (et.getKind() == Tree.Kind.ANNOTATED_TYPE) {
+            et = ((AnnotatedTypeTree)et).getUnderlyingType();
+            exPath = new TreePath(exPath, et);
+        }
         if (parent.getKind() != Tree.Kind.PARENTHESIZED &&
                 (et.getKind() == Tree.Kind.PRIMITIVE_TYPE || et.getKind() == Tree.Kind.ARRAY_TYPE || et.getKind() == Tree.Kind.PARAMETERIZED_TYPE)) {
             TypeMirror tm = info.getTrees().getTypeMirror(exPath);
@@ -2932,39 +2935,40 @@ public final class JavaCompletionQuery {
     }
 
     private void addMethodReferences(final Env env, final TypeMirror type, final Element elem) throws IOException {
-//        Set<? extends TypeMirror> smartTypes = env.getSmartTypes();
-//        final String prefix = env.getPrefix();
-//        final CompilationController controller = env.getController();
-//        final Elements elements = controller.getElements();
-//        final Types types = controller.getTypes();
-//        final TreeUtilities tu = controller.getTreeUtilities();
-//        TypeElement typeElem = type.getKind() == TypeKind.DECLARED ? (TypeElement)((DeclaredType)type).asElement() : null;
-//        final boolean isThisCall = elem != null && elem.getKind().isField() && elem.getSimpleName().contentEquals(THIS_KEYWORD);
-//        final boolean isSuperCall = elem != null && elem.getKind().isField() && elem.getSimpleName().contentEquals(SUPER_KEYWORD);
-//        final Scope scope = env.getScope();
-//        if ((isThisCall || isSuperCall) && tu.isStaticContext(scope))
-//            return;
-//        ElementUtilities.ElementAcceptor acceptor = new ElementUtilities.ElementAcceptor() {
-//            public boolean accept(Element e, TypeMirror t) {
-//                switch (e.getKind()) {
-//                    case METHOD:
-//                        String sn = e.getSimpleName().toString();
-//                        return startsWith(env, sn, prefix) &&
-//                                (Utilities.isShowDeprecatedMembers() || !elements.isDeprecated(e)) &&
-//                                env.isAccessible(scope, e, t, isSuperCall) &&
-//                                (!Utilities.isExcludeMethods() || !Utilities.isExcluded(Utilities.getElementName(e.getEnclosingElement(), true) + "." + sn)); //NOI18N
-//                }
-//                return false;
-//            }
-//        };
-//        for(Element e : controller.getElementUtilities().getMembers(type, acceptor)) {
-//            switch (e.getKind()) {
-//                case METHOD:
-//                    ExecutableType et = (ExecutableType)asMemberOf(e, type, types);
+        Set<? extends TypeMirror> smartTypes = env.getSmartTypes();
+        final String prefix = env.getPrefix();
+        final CompilationInfo info = env.getInfo();
+        final Elements elements = info.getElements();
+        final Types types = info.getTypes();
+        final TreeUtilities tu = info.getTreeUtilities();
+        TypeElement typeElem = type.getKind() == TypeKind.DECLARED ? (TypeElement)((DeclaredType)type).asElement() : null;
+        final boolean isThisCall = elem != null && elem.getKind().isField() && elem.getSimpleName().contentEquals(THIS_KEYWORD);
+        final boolean isSuperCall = elem != null && elem.getKind().isField() && elem.getSimpleName().contentEquals(SUPER_KEYWORD);
+        final Scope scope = env.getScope();
+        if ((isThisCall || isSuperCall) && tu.isStaticContext(scope))
+            return;
+        ElementUtilities.ElementAcceptor acceptor = new ElementUtilities.ElementAcceptor() {
+            public boolean accept(Element e, TypeMirror t) {
+                switch (e.getKind()) {
+                    case METHOD:
+                        String sn = e.getSimpleName().toString();
+                        return startsWith(env, sn, prefix) &&
+                                (Utilities.isShowDeprecatedMembers() || !elements.isDeprecated(e)) &&
+                                env.isAccessible(scope, e, t, isSuperCall) &&
+                                (!Utilities.isExcludeMethods() || !Utilities.isExcluded(Utilities.getElementName(info, e.getEnclosingElement(), true) + "." + sn)); //NOI18N
+                }
+                return false;
+            }
+        };
+        for(Element e : info.getElementUtilities().getMembers(type, acceptor)) {
+            switch (e.getKind()) {
+                case METHOD:
+                    ExecutableType et = (ExecutableType)asMemberOf(e, type, types);
 //                    results.add(JavaCompletionItem.createExecutableItem(env.getController(), (ExecutableElement)e, et, anchorOffset, null, typeElem != e.getEnclosingElement(), elements.isDeprecated(e), false, false, isOfSmartType(env, et, smartTypes), env.assignToVarPos(), true, env.getWhiteList()));
-//                    break;
-//            }
-//        }
+                    results.add(Utilities.getElementName(info, e, false).toString());
+                    break;
+            }
+        }
     }
 
     private void addMembers(final Env env, final TypeMirror type, final Element elem, final EnumSet<ElementKind> kinds, final DeclaredType baseType, final boolean inImport, final boolean insideNew, final boolean autoImport) throws IOException {
@@ -4604,20 +4608,22 @@ public final class JavaCompletionQuery {
                     if (text.trim().endsWith("[")) //NOI18N
                         return Collections.singleton(info.getTypes().getPrimitiveType(TypeKind.INT));
                     return null;
-//                case LAMBDA_EXPRESSION:
-//                    LambdaExpressionTree let = (LambdaExpressionTree)tree;
-//                    int pos = (int)env.getSourcePositions().getStartPosition(env.getRoot(), let.getBody());
-//                    if (offset <= pos && findLastNonWhitespaceToken(env, tree, offset).token().id() != JavaTokenId.ARROW
-//                            || lastTree != null && lastTree.getKind() == Tree.Kind.BLOCK)
-//                        break;
-//                    type = info.getTrees().getTypeMirror(path);
-//                    if (type != null && type.getKind() == TypeKind.DECLARED) {
-//                        ExecutableType descType = info.getTypeUtilities().getDescriptorType((DeclaredType)type);
-//                        if (descType != null) {
-//                            return Collections.singleton(descType.getReturnType());
-//                        }
-//                    }
-//                    break;
+                case LAMBDA_EXPRESSION:
+                    LambdaExpressionTree let = (LambdaExpressionTree)tree;
+                    int pos = (int)env.getSourcePositions().getStartPosition(env.getRoot(), let.getBody());
+                    ListIterator<? extends Pair<String, Integer>> ts = findLastNonWhitespaceToken(env, tree, offset);
+                    String token = ts != null && ts.hasPrevious() ? ts.previous().first : null;
+                    if (offset <= pos && !ARROW.equals(token)
+                            || lastTree != null && lastTree.getKind() == Tree.Kind.BLOCK)
+                        break;
+                    type = info.getTrees().getTypeMirror(path);
+                    if (type != null && type.getKind() == TypeKind.DECLARED) {
+                        ExecutableType descType = info.getTypeUtilities().getDescriptorType((DeclaredType)type);
+                        if (descType != null) {
+                            return Collections.singleton(descType.getReturnType());
+                        }
+                    }
+                    break;
                 case CASE:
                     CaseTree ct = (CaseTree)tree;
                     ExpressionTree exp = ct.getExpression();
@@ -4632,7 +4638,7 @@ public final class JavaCompletionQuery {
                     return null;
                 case ANNOTATION:
                     AnnotationTree ann = (AnnotationTree)tree;
-                    int pos = (int)env.getSourcePositions().getStartPosition(env.getRoot(), ann.getAnnotationType());
+                    pos = (int)env.getSourcePositions().getStartPosition(env.getRoot(), ann.getAnnotationType());
                     if (offset <= pos)
                         break;
                     pos = (int)env.getSourcePositions().getEndPosition(env.getRoot(), ann.getAnnotationType());
@@ -5142,15 +5148,15 @@ public final class JavaCompletionQuery {
 //        }
         TreePath path = info.getTreeUtilities().pathFor(queryOffset);
 //        if (queryType != DOCUMENTATION_QUERY_TYPE) {
-//            TreePath treePath = path;
-//            while (treePath != null) {
-//                TreePath pPath = treePath.getParentPath();
-//                TreePath gpPath = pPath != null ? pPath.getParentPath() : null;
-//                Env env = getEnvImpl(controller, path, treePath, pPath, gpPath, offset, prefix, true);
-//                if (env != null)
-//                    return env;
-//                treePath = treePath.getParentPath();
-//            }
+            TreePath treePath = path;
+            while (treePath != null) {
+                TreePath pPath = treePath.getParentPath();
+                TreePath gpPath = pPath != null ? pPath.getParentPath() : null;
+                Env env = getEnvImpl(info, path, treePath, pPath, gpPath, queryOffset, prefix, true);
+                if (env != null)
+                    return env;
+                treePath = treePath.getParentPath();
+            }
 //        } else {
 //            if (Phase.RESOLVED.compareTo(controller.getPhase()) > 0) {
 //                LinkedList<TreePath> reversePath = new LinkedList<TreePath>();
@@ -5171,227 +5177,222 @@ public final class JavaCompletionQuery {
         return new Env(queryOffset, prefix, info, path, info.getTrees().getSourcePositions(), null);
     }
 
-//    private Env getEnvImpl(CompilationController controller, TreePath orig, TreePath path, TreePath pPath, TreePath gpPath, int offset, String prefix, boolean upToOffset) throws IOException {
-//        Tree tree = path != null ? path.getLeaf() : null;
-//        Tree parent = pPath != null ? pPath.getLeaf() : null;
-//        Tree grandParent = gpPath != null ? gpPath.getLeaf() : null;
-//        SourcePositions sourcePositions = controller.getTrees().getSourcePositions();
-//        CompilationUnitTree root = controller.getCompilationUnit();
-//        TreeUtilities tu = controller.getTreeUtilities();
-//        if (upToOffset && TreeUtilities.CLASS_TREE_KINDS.contains(tree.getKind())) {
-//            controller.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
-//            return new Env(offset, prefix, controller, orig, sourcePositions, null);
-//        } else if (parent != null && tree.getKind() == Tree.Kind.BLOCK
-//                && (parent.getKind() == Tree.Kind.METHOD || TreeUtilities.CLASS_TREE_KINDS.contains(parent.getKind()))) {
-//            controller.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
-//            int blockPos = (int)sourcePositions.getStartPosition(root, tree);
-//            String blockText = controller.getText().substring(blockPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, tree));
-//            final SourcePositions[] sp = new SourcePositions[1];
-//            final StatementTree block = (((BlockTree)tree).isStatic() ? tu.parseStaticBlock(blockText, sp) : tu.parseStatement(blockText, sp));
-//            if (block == null)
-//                return null;
-//            sourcePositions = new SourcePositionsImpl(block, sourcePositions, sp[0], blockPos, upToOffset ? offset : -1);
-//            Scope scope = controller.getTrees().getScope(path);
-//            path = tu.pathFor(new TreePath(pPath, block), offset, sourcePositions);
-//            if (upToOffset) {
-//                Tree last = path.getLeaf();
-//                List<? extends StatementTree> stmts = null;
-//                switch (path.getLeaf().getKind()) {
-//                    case BLOCK:
-//                        stmts = ((BlockTree)path.getLeaf()).getStatements();
-//                        break;
-//                    case FOR_LOOP:
-//                        stmts = ((ForLoopTree)path.getLeaf()).getInitializer();
-//                        break;
-//                    case ENHANCED_FOR_LOOP:
-//                        stmts = Collections.singletonList(((EnhancedForLoopTree)path.getLeaf()).getStatement());
-//                        break;
-//                    case METHOD:
-//                        stmts = ((MethodTree)path.getLeaf()).getParameters();
-//                        break;
-//                    case SWITCH:
-//                        CaseTree lastCase = null;
-//                        for (CaseTree caseTree : ((SwitchTree)path.getLeaf()).getCases())
-//                            lastCase = caseTree;
-//                        if (lastCase != null)
-//                            stmts = lastCase.getStatements();
-//                        break;
-//                    case CASE:
-//                        stmts = ((CaseTree)path.getLeaf()).getStatements();
-//                        break;
-//                }
-//                if (stmts != null) {
-//                    for (StatementTree st : stmts) {
-//                        if (sourcePositions.getEndPosition(root, st) <= offset)
-//                            last = st;
-//                    }
-//                }
-//                scope = tu.reattributeTreeTo(block, scope, last);
-//            } else {
-//                tu.reattributeTreeTo(block, scope, block);
-//            }
-//            return new Env(offset, prefix, controller, path, sourcePositions, scope);
-//        } else if (tree.getKind() == Tree.Kind.LAMBDA_EXPRESSION) {
-//            controller.toPhase(Phase.RESOLVED);
-//            Tree lambdaBody = ((LambdaExpressionTree)tree).getBody();
-//            Scope scope = null;
-//            TreePath blockPath = path.getParentPath();
-//            while (blockPath != null) {
-//                if (blockPath.getLeaf().getKind() == Tree.Kind.BLOCK) {
-//                    if (blockPath.getParentPath().getLeaf().getKind() == Tree.Kind.METHOD
-//                            || TreeUtilities.CLASS_TREE_KINDS.contains(blockPath.getParentPath().getLeaf().getKind())) {
-//                        final int blockPos = (int)sourcePositions.getStartPosition(root, blockPath.getLeaf());
-//                        final String blockText = controller.getText().substring(blockPos, (int)sourcePositions.getEndPosition(root, blockPath.getLeaf()));
-//                        final SourcePositions[] sp = new SourcePositions[1];
-//                        final StatementTree block = (((BlockTree)blockPath.getLeaf()).isStatic() ? tu.parseStaticBlock(blockText, sp) : tu.parseStatement(blockText, sp));
-//                        if (block == null)
-//                            return null;
-//                        sourcePositions = new SourcePositionsImpl(block, sourcePositions, sp[0], blockPos, -1);
-//                        scope = controller.getTrees().getScope(blockPath);
-//                        path = Utilities.getPathElementOfKind(Tree.Kind.LAMBDA_EXPRESSION, tu.pathFor(new TreePath(blockPath.getParentPath(), block), offset, sourcePositions));
-//                        lambdaBody = ((LambdaExpressionTree)path.getLeaf()).getBody();
-//                        scope = tu.reattributeTreeTo(block, scope, lambdaBody);
-//                        break;
-//                    }
-//                }
-//                blockPath = blockPath.getParentPath();
-//            }
-//            if (scope == null) {
-//                scope = controller.getTrees().getScope(new TreePath(path, lambdaBody));
-//            }
-//            final int bodyPos = (int)sourcePositions.getStartPosition(root, lambdaBody);
-//            if (bodyPos >= offset) {
-//                TokenSequence<JavaTokenId> ts = controller.getTokenHierarchy().tokenSequence(JavaTokenId.language());
-//                ts.move(offset);
-//                while(ts.movePrevious()) {
-//                    switch (ts.token().id()) {
-//                        case WHITESPACE:
-//                        case LINE_COMMENT:
-//                        case BLOCK_COMMENT:
-//                        case JAVADOC_COMMENT:
-//                            break;
-//                        case ARROW:
-//                            return new Env(offset, prefix, controller, path, sourcePositions, scope);
-//                        default:
-//                            return null;
-//                    }
-//                }
-//            }
-//            String bodyText = controller.getText().substring(bodyPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, lambdaBody));
-//            final SourcePositions[] sp = new SourcePositions[1];
-//            final Tree body = bodyText.charAt(0) == '{' ? tu.parseStatement(bodyText, sp) : tu.parseExpression(bodyText, sp);
-//            final Tree fake = body instanceof ExpressionTree ? new ExpressionStatementTree() {
-//                public Object accept(TreeVisitor v, Object p) {
-//                    return v.visitExpressionStatement(this, p);
-//                }
-//                public ExpressionTree getExpression() {
-//                    return (ExpressionTree) body;
-//                }
-//                public Kind getKind() {
-//                    return Tree.Kind.EXPRESSION_STATEMENT;
-//                }
-//            } : body;
-//            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], bodyPos, upToOffset ? offset : -1);
-//            path = tu.pathFor(new TreePath(path, fake), offset, sourcePositions);
-//            if (upToOffset && !(body instanceof ExpressionTree)) {
-//                Tree last = path.getLeaf();
-//                List<? extends StatementTree> stmts = null;
-//                switch (path.getLeaf().getKind()) {
-//                    case BLOCK:
-//                        stmts = ((BlockTree)path.getLeaf()).getStatements();
-//                        break;
-//                    case FOR_LOOP:
-//                        stmts = ((ForLoopTree)path.getLeaf()).getInitializer();
-//                        break;
-//                    case ENHANCED_FOR_LOOP:
-//                        stmts = Collections.singletonList(((EnhancedForLoopTree)path.getLeaf()).getStatement());
-//                        break;
-//                    case METHOD:
-//                        stmts = ((MethodTree)path.getLeaf()).getParameters();
-//                        break;
-//                    case SWITCH:
-//                        CaseTree lastCase = null;
-//                        for (CaseTree caseTree : ((SwitchTree)path.getLeaf()).getCases())
-//                            lastCase = caseTree;
-//                        if (lastCase != null)
-//                            stmts = lastCase.getStatements();
-//                        break;
-//                    case CASE:
-//                        stmts = ((CaseTree)path.getLeaf()).getStatements();
-//                        break;
-//                }
-//                if (stmts != null) {
-//                    for (StatementTree st : stmts) {
-//                        if (sourcePositions.getEndPosition(root, st) <= offset)
-//                            last = st;
-//                    }
-//                }
-//                scope = tu.reattributeTreeTo(body, scope, last);
-//            } else {
-//                scope = tu.reattributeTreeTo(body, scope, body);
-//            }
-//            return new Env(offset, prefix, controller, path, sourcePositions, scope);
-//        } else if (grandParent != null && TreeUtilities.CLASS_TREE_KINDS.contains(grandParent.getKind()) &&
-//                parent != null && parent.getKind() == Tree.Kind.VARIABLE && unwrapErrTree(((VariableTree)parent).getInitializer()) == tree) {
-//            if (tu.isEnum((ClassTree)grandParent)) {
-//                controller.toPhase(Phase.RESOLVED);
-//                return null;
-//            }
-//            controller.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
-//            final int initPos = (int)sourcePositions.getStartPosition(root, tree);
-//            String initText = controller.getText().substring(initPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, tree));
-//            final SourcePositions[] sp = new SourcePositions[1];
-//            final ExpressionTree init = tu.parseVariableInitializer(initText, sp);
-//            final ExpressionStatementTree fake = new ExpressionStatementTree() {
-//                public Object accept(TreeVisitor v, Object p) {
-//                    return v.visitExpressionStatement(this, p);
-//                }
-//                public ExpressionTree getExpression() {
-//                    return init;
-//                }
-//                public Kind getKind() {
-//                    return Tree.Kind.EXPRESSION_STATEMENT;
-//                }
-//            };
-//            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], initPos, upToOffset ? offset : -1);
-//            Scope scope = controller.getTrees().getScope(path);
-//            path = tu.pathFor(new TreePath(pPath, fake), offset, sourcePositions);
-//            if (upToOffset && sp[0].getEndPosition(root, init) + initPos > offset) {
-//                scope = tu.reattributeTreeTo(init, scope, path.getLeaf());
-//            } else {
-//                tu.reattributeTree(init, scope);
-//            }
-//            return new Env(offset, prefix, controller, path, sourcePositions, scope);
-//        } else if (parent != null && TreeUtilities.CLASS_TREE_KINDS.contains(parent.getKind()) && tree.getKind() == Tree.Kind.VARIABLE &&
-//                ((VariableTree)tree).getInitializer() != null && orig == path &&
-//                sourcePositions.getStartPosition(root, ((VariableTree)tree).getInitializer()) >= 0 &&
-//                sourcePositions.getStartPosition(root, ((VariableTree)tree).getInitializer()) <= offset) {
-//            controller.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
-//            tree = ((VariableTree)tree).getInitializer();
-//            final int initPos = (int)sourcePositions.getStartPosition(root, tree);
-//            String initText = controller.getText().substring(initPos, offset);
-//            final SourcePositions[] sp = new SourcePositions[1];
-//            final ExpressionTree init = tu.parseVariableInitializer(initText, sp);
-//            Scope scope = controller.getTrees().getScope(new TreePath(path, tree));
-//            final ExpressionStatementTree fake = new ExpressionStatementTree() {
-//                public Object accept(TreeVisitor v, Object p) {
-//                    return v.visitExpressionStatement(this, p);
-//                }
-//                public ExpressionTree getExpression() {
-//                    return init;
-//                }
-//                public Kind getKind() {
-//                    return Tree.Kind.EXPRESSION_STATEMENT;
-//                }
-//            };
-//            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], initPos, offset);
-//            path = tu.pathFor(new TreePath(path, fake), offset, sourcePositions);
-//            tu.reattributeTree(init, scope);
-//            return new Env(offset, prefix, controller, path, sourcePositions, scope);
-//        }
-//        return null;
-//    }
-//
+    private Env getEnvImpl(CompilationInfo info, TreePath orig, TreePath path, TreePath pPath, TreePath gpPath, int offset, String prefix, boolean upToOffset) throws IOException {
+        Tree tree = path != null ? path.getLeaf() : null;
+        Tree parent = pPath != null ? pPath.getLeaf() : null;
+        Tree grandParent = gpPath != null ? gpPath.getLeaf() : null;
+        SourcePositions sourcePositions = info.getTrees().getSourcePositions();
+        CompilationUnitTree root = info.getCompilationUnit();
+        TreeUtilities tu = info.getTreeUtilities();
+        if (upToOffset && TreeUtilities.CLASS_TREE_KINDS.contains(tree.getKind())) {
+            info.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
+            return new Env(offset, prefix, info, orig, sourcePositions, null);
+        } else if (parent != null && tree.getKind() == Tree.Kind.BLOCK
+                && (parent.getKind() == Tree.Kind.METHOD || TreeUtilities.CLASS_TREE_KINDS.contains(parent.getKind()))) {
+            info.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
+            int blockPos = (int)sourcePositions.getStartPosition(root, tree);
+            String blockText = info.getText().substring(blockPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, tree));
+            final SourcePositions[] sp = new SourcePositions[1];
+            final StatementTree block = (((BlockTree)tree).isStatic() ? tu.parseStaticBlock(blockText, sp) : tu.parseStatement(blockText, sp));
+            if (block == null)
+                return null;
+            sourcePositions = new SourcePositionsImpl(block, sourcePositions, sp[0], blockPos, upToOffset ? offset : -1);
+            Scope scope = info.getTrees().getScope(path);
+            path = tu.pathFor(new TreePath(pPath, block), offset, sourcePositions);
+            if (upToOffset) {
+                Tree last = path.getLeaf();
+                List<? extends StatementTree> stmts = null;
+                switch (path.getLeaf().getKind()) {
+                    case BLOCK:
+                        stmts = ((BlockTree)path.getLeaf()).getStatements();
+                        break;
+                    case FOR_LOOP:
+                        stmts = ((ForLoopTree)path.getLeaf()).getInitializer();
+                        break;
+                    case ENHANCED_FOR_LOOP:
+                        stmts = Collections.singletonList(((EnhancedForLoopTree)path.getLeaf()).getStatement());
+                        break;
+                    case METHOD:
+                        stmts = ((MethodTree)path.getLeaf()).getParameters();
+                        break;
+                    case SWITCH:
+                        CaseTree lastCase = null;
+                        for (CaseTree caseTree : ((SwitchTree)path.getLeaf()).getCases())
+                            lastCase = caseTree;
+                        if (lastCase != null)
+                            stmts = lastCase.getStatements();
+                        break;
+                    case CASE:
+                        stmts = ((CaseTree)path.getLeaf()).getStatements();
+                        break;
+                }
+                if (stmts != null) {
+                    for (StatementTree st : stmts) {
+                        if (sourcePositions.getEndPosition(root, st) <= offset)
+                            last = st;
+                    }
+                }
+                scope = tu.reattributeTreeTo(block, scope, last);
+            } else {
+                tu.reattributeTreeTo(block, scope, block);
+            }
+            return new Env(offset, prefix, info, path, sourcePositions, scope);
+        } else if (tree.getKind() == Tree.Kind.LAMBDA_EXPRESSION) {
+            info.toPhase(Phase.RESOLVED);
+            Tree lambdaBody = ((LambdaExpressionTree)tree).getBody();
+            Scope scope = null;
+            TreePath blockPath = path.getParentPath();
+            while (blockPath != null) {
+                if (blockPath.getLeaf().getKind() == Tree.Kind.BLOCK) {
+                    if (blockPath.getParentPath().getLeaf().getKind() == Tree.Kind.METHOD
+                            || TreeUtilities.CLASS_TREE_KINDS.contains(blockPath.getParentPath().getLeaf().getKind())) {
+                        final int blockPos = (int)sourcePositions.getStartPosition(root, blockPath.getLeaf());
+                        final String blockText = info.getText().substring(blockPos, (int)sourcePositions.getEndPosition(root, blockPath.getLeaf()));
+                        final SourcePositions[] sp = new SourcePositions[1];
+                        final StatementTree block = (((BlockTree)blockPath.getLeaf()).isStatic() ? tu.parseStaticBlock(blockText, sp) : tu.parseStatement(blockText, sp));
+                        if (block == null)
+                            return null;
+                        sourcePositions = new SourcePositionsImpl(block, sourcePositions, sp[0], blockPos, -1);
+                        scope = info.getTrees().getScope(blockPath);
+                        path = Utilities.getPathElementOfKind(Tree.Kind.LAMBDA_EXPRESSION, tu.pathFor(new TreePath(blockPath.getParentPath(), block), offset, sourcePositions));
+                        lambdaBody = ((LambdaExpressionTree)path.getLeaf()).getBody();
+                        scope = tu.reattributeTreeTo(block, scope, lambdaBody);
+                        break;
+                    }
+                }
+                blockPath = blockPath.getParentPath();
+            }
+            if (scope == null) {
+                scope = info.getTrees().getScope(new TreePath(path, lambdaBody));
+            }
+            final int bodyPos = (int)sourcePositions.getStartPosition(root, lambdaBody);
+            if (bodyPos >= offset) {
+                List<? extends Pair<String, Integer>> tokens = info.getTokens((int)sourcePositions.getStartPosition(root, tree), offset);
+                ListIterator<? extends Pair<String, Integer>> ts = tokens != null ? tokens.listIterator(tokens.size()) : null;
+                if(ts != null && ts.hasPrevious()) {
+                    switch (ts.previous().first) {
+                        case ARROW:
+                            return new Env(offset, prefix, info, path, sourcePositions, scope);
+                        default:
+                            return null;
+                    }
+                }
+            }
+            String bodyText = info.getText().substring(bodyPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, lambdaBody));
+            final SourcePositions[] sp = new SourcePositions[1];
+            final Tree body = bodyText.charAt(0) == '{' ? tu.parseStatement(bodyText, sp) : tu.parseExpression(bodyText, sp);
+            final Tree fake = body instanceof ExpressionTree ? new ExpressionStatementTree() {
+                public Object accept(TreeVisitor v, Object p) {
+                    return v.visitExpressionStatement(this, p);
+                }
+                public ExpressionTree getExpression() {
+                    return (ExpressionTree) body;
+                }
+                public Kind getKind() {
+                    return Tree.Kind.EXPRESSION_STATEMENT;
+                }
+            } : body;
+            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], bodyPos, upToOffset ? offset : -1);
+            path = tu.pathFor(new TreePath(path, fake), offset, sourcePositions);
+            if (upToOffset && !(body instanceof ExpressionTree)) {
+                Tree last = path.getLeaf();
+                List<? extends StatementTree> stmts = null;
+                switch (path.getLeaf().getKind()) {
+                    case BLOCK:
+                        stmts = ((BlockTree)path.getLeaf()).getStatements();
+                        break;
+                    case FOR_LOOP:
+                        stmts = ((ForLoopTree)path.getLeaf()).getInitializer();
+                        break;
+                    case ENHANCED_FOR_LOOP:
+                        stmts = Collections.singletonList(((EnhancedForLoopTree)path.getLeaf()).getStatement());
+                        break;
+                    case METHOD:
+                        stmts = ((MethodTree)path.getLeaf()).getParameters();
+                        break;
+                    case SWITCH:
+                        CaseTree lastCase = null;
+                        for (CaseTree caseTree : ((SwitchTree)path.getLeaf()).getCases())
+                            lastCase = caseTree;
+                        if (lastCase != null)
+                            stmts = lastCase.getStatements();
+                        break;
+                    case CASE:
+                        stmts = ((CaseTree)path.getLeaf()).getStatements();
+                        break;
+                }
+                if (stmts != null) {
+                    for (StatementTree st : stmts) {
+                        if (sourcePositions.getEndPosition(root, st) <= offset)
+                            last = st;
+                    }
+                }
+                scope = tu.reattributeTreeTo(body, scope, last);
+            } else {
+                scope = tu.reattributeTreeTo(body, scope, body);
+            }
+            return new Env(offset, prefix, info, path, sourcePositions, scope);
+        } else if (grandParent != null && TreeUtilities.CLASS_TREE_KINDS.contains(grandParent.getKind()) &&
+                parent != null && parent.getKind() == Tree.Kind.VARIABLE && unwrapErrTree(((VariableTree)parent).getInitializer()) == tree) {
+            if (tu.isEnum((ClassTree)grandParent)) {
+                info.toPhase(Phase.RESOLVED);
+                return null;
+            }
+            info.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
+            final int initPos = (int)sourcePositions.getStartPosition(root, tree);
+            String initText = info.getText().substring(initPos, upToOffset ? offset : (int)sourcePositions.getEndPosition(root, tree));
+            final SourcePositions[] sp = new SourcePositions[1];
+            final ExpressionTree init = tu.parseVariableInitializer(initText, sp);
+            final ExpressionStatementTree fake = new ExpressionStatementTree() {
+                public Object accept(TreeVisitor v, Object p) {
+                    return v.visitExpressionStatement(this, p);
+                }
+                public ExpressionTree getExpression() {
+                    return init;
+                }
+                public Kind getKind() {
+                    return Tree.Kind.EXPRESSION_STATEMENT;
+                }
+            };
+            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], initPos, upToOffset ? offset : -1);
+            Scope scope = info.getTrees().getScope(path);
+            path = tu.pathFor(new TreePath(pPath, fake), offset, sourcePositions);
+            if (upToOffset && sp[0].getEndPosition(root, init) + initPos > offset) {
+                scope = tu.reattributeTreeTo(init, scope, path.getLeaf());
+            } else {
+                tu.reattributeTree(init, scope);
+            }
+            return new Env(offset, prefix, info, path, sourcePositions, scope);
+        } else if (parent != null && TreeUtilities.CLASS_TREE_KINDS.contains(parent.getKind()) && tree.getKind() == Tree.Kind.VARIABLE &&
+                ((VariableTree)tree).getInitializer() != null && orig == path &&
+                sourcePositions.getStartPosition(root, ((VariableTree)tree).getInitializer()) >= 0 &&
+                sourcePositions.getStartPosition(root, ((VariableTree)tree).getInitializer()) <= offset) {
+            info.toPhase(Utilities.inAnonymousOrLocalClass(path)? Phase.RESOLVED : Phase.ELEMENTS_RESOLVED);
+            tree = ((VariableTree)tree).getInitializer();
+            final int initPos = (int)sourcePositions.getStartPosition(root, tree);
+            String initText = info.getText().substring(initPos, offset);
+            final SourcePositions[] sp = new SourcePositions[1];
+            final ExpressionTree init = tu.parseVariableInitializer(initText, sp);
+            Scope scope = info.getTrees().getScope(new TreePath(path, tree));
+            final ExpressionStatementTree fake = new ExpressionStatementTree() {
+                public Object accept(TreeVisitor v, Object p) {
+                    return v.visitExpressionStatement(this, p);
+                }
+                public ExpressionTree getExpression() {
+                    return init;
+                }
+                public Kind getKind() {
+                    return Tree.Kind.EXPRESSION_STATEMENT;
+                }
+            };
+            sourcePositions = new SourcePositionsImpl(fake, sourcePositions, sp[0], initPos, offset);
+            path = tu.pathFor(new TreePath(path, fake), offset, sourcePositions);
+            tu.reattributeTree(init, scope);
+            return new Env(offset, prefix, info, path, sourcePositions, scope);
+        }
+        return null;
+    }
+
     private boolean startsWith(Env env, String theString) {
         String prefix = env.getPrefix();
         return startsWith(env, theString, prefix);
@@ -5583,20 +5584,20 @@ public final class JavaCompletionQuery {
         }
 
         public Set<? extends TypeMirror> getSmartTypes() throws IOException {
-//            if (smartTypes == null) {
-//                info.toPhase(Phase.RESOLVED);
-//                smartTypes = JavaCompletionQuery.this.getSmartTypes(this);
-//                if(smartTypes != null) {
-//                    Iterator<? extends TypeMirror> it = smartTypes.iterator();
-//                    TypeMirror err = null;
-//                    if (it.hasNext()) {
-//                        err = it.next();
-//                        if (it.hasNext() || err.getKind() != TypeKind.ERROR) {
-//                            err = null;
-//                        }
-//                    }
-//                    if (err != null) {
-//                        HashSet<TypeMirror> st = new HashSet<TypeMirror>();
+            if (smartTypes == null) {
+                info.toPhase(Phase.RESOLVED);
+                smartTypes = JavaCompletionQuery.this.getSmartTypes(this);
+                if(smartTypes != null) {
+                    Iterator<? extends TypeMirror> it = smartTypes.iterator();
+                    TypeMirror err = null;
+                    if (it.hasNext()) {
+                        err = it.next();
+                        if (it.hasNext() || err.getKind() != TypeKind.ERROR) {
+                            err = null;
+                        }
+                    }
+                    if (err != null) {
+                        HashSet<TypeMirror> st = new HashSet<>();
 //                        Types types = info.getTypes();
 //                        TypeElement te = (TypeElement) ((DeclaredType)err).asElement();
 //                        if (te.getQualifiedName() == te.getSimpleName()) {
@@ -5608,12 +5609,11 @@ public final class JavaCompletionQuery {
 //                                }
 //                            }
 //                        }
-//                        smartTypes = st;
-//                    }
-//                }
-//            }
-//            return smartTypes;
-            return null;
+                        smartTypes = st;
+                    }
+                }
+            }
+            return smartTypes;
         }
 
         public void addToExcludes(Element toExclude) {
@@ -5665,20 +5665,20 @@ public final class JavaCompletionQuery {
         }
 
         public int assignToVarPos() {
-//            if (assignToVarPos < -1) {
-//                TreePath tp = getPath();
-//                Tree tree = tp.getLeaf();
-//                if (tp.getLeaf().getKind() == Tree.Kind.MEMBER_SELECT ||
-//                    (tp.getLeaf().getKind() == Tree.Kind.METHOD_INVOCATION && ((MethodInvocationTree)tp.getLeaf()).getMethodSelect() == tree))
-//                    tp = tp.getParentPath();
-//                if (tp.getLeaf().getKind() == Tree.Kind.EXPRESSION_STATEMENT) {
-//                    assignToVarPos = getInfo().getSnapshot().getOriginalOffset((int) getSourcePositions().getStartPosition(getRoot(), tree));
-//                } else if (tp.getLeaf().getKind() == Tree.Kind.BLOCK) {
-//                    assignToVarPos = getInfo().getSnapshot().getOriginalOffset(offset);
-//                } else {
-//                    assignToVarPos = -1;
-//                }
-//            }
+            if (assignToVarPos < -1) {
+                TreePath tp = getPath();
+                Tree tree = tp.getLeaf();
+                if (tp.getLeaf().getKind() == Tree.Kind.MEMBER_SELECT ||
+                    (tp.getLeaf().getKind() == Tree.Kind.METHOD_INVOCATION && ((MethodInvocationTree)tp.getLeaf()).getMethodSelect() == tree))
+                    tp = tp.getParentPath();
+                if (tp.getLeaf().getKind() == Tree.Kind.EXPRESSION_STATEMENT) {
+                    assignToVarPos = (int) getSourcePositions().getStartPosition(getRoot(), tree);
+                } else if (tp.getLeaf().getKind() == Tree.Kind.BLOCK) {
+                    assignToVarPos = offset;
+                } else {
+                    assignToVarPos = -1;
+                }
+            }
             return assignToVarPos;
         }
     }

@@ -62,8 +62,11 @@ import javax.lang.model.type.UnionType;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-
 import com.sun.tools.javac.api.JavacScope;
+import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.comp.AttrContext;
+import com.sun.tools.javac.comp.Enter;
+import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.comp.Resolve;
 
 /**
@@ -239,6 +242,11 @@ public final class TreeUtilities {
             Result(TreePath path) {
                 this.path = path;
             }
+
+            @Override
+            public synchronized Throwable fillInStackTrace() {
+                return this;
+            }            
         }
         
         class PathFinder extends TreePathScanner<Void,Void> {
@@ -296,161 +304,163 @@ public final class TreeUtilities {
         
         if (path.getLeaf() == path.getCompilationUnit())
             return path;
-        
-//        TokenSequence<JavaTokenId> tokenList = tokensFor(path.getLeaf(), sourcePositions);
-//        tokenList.moveEnd();
-//        if (tokenList.movePrevious() && tokenList.offset() < pos) {
-//            switch (tokenList.token().id()) {
-//                case GTGTGT:
-//                case GTGT:
-//                case GT:
-//                    if (path.getLeaf().getKind() == Tree.Kind.MEMBER_SELECT || TreeUtilities.CLASS_TREE_KINDS.contains(path.getLeaf().getKind()) ||
-//                            path.getLeaf().getKind() == Tree.Kind.MEMBER_REFERENCE || path.getLeaf().getKind() == Tree.Kind.GREATER_THAN)
-//                        break;
-//                case RPAREN:
-//                    if (path.getLeaf().getKind() == Tree.Kind.PARENTHESIZED) {
-//                        path = path.getParentPath();
-//                        break;
-//                    } else if (path.getLeaf().getKind() == Tree.Kind.ENHANCED_FOR_LOOP || path.getLeaf().getKind() == Tree.Kind.FOR_LOOP ||
-//                            path.getLeaf().getKind() == Tree.Kind.IF || path.getLeaf().getKind() == Tree.Kind.WHILE_LOOP ||
-//                            path.getLeaf().getKind() == Tree.Kind.DO_WHILE_LOOP || path.getLeaf().getKind() == Tree.Kind.TYPE_CAST ||
-//                            path.getLeaf().getKind() == Tree.Kind.LAMBDA_EXPRESSION)
-//                        break;
-//                case SEMICOLON:
-//                    if (path.getLeaf().getKind() == Tree.Kind.FOR_LOOP &&
-//                            tokenList.offset() <= sourcePositions.getStartPosition(path.getCompilationUnit(), ((ForLoopTree)path.getLeaf()).getUpdate().get(0)))
-//                        break;
-//                case RBRACE:
-//                    path = path.getParentPath();
-//                    switch (path.getLeaf().getKind()) {
-//                        case CATCH:
-//                            path = path.getParentPath();
-//                        case METHOD:
-//                        case FOR_LOOP:
-//                        case ENHANCED_FOR_LOOP:
-//                        case SYNCHRONIZED:
-//                        case WHILE_LOOP:
-//                        case TRY:
-//                            path = path.getParentPath();
-//                            break;
-//                        case IF:
-//                            do {
-//                                path = path.getParentPath();
-//                            } while (path != null && path.getLeaf().getKind() == Tree.Kind.IF);
-//                            break;
-//                    }
-//                    break;
-//            }
-//        }
+        List<? extends CompilationInfo.Pair<String, Integer>> tokenList = tokensFor(path.getLeaf(), sourcePositions);
+        ListIterator<? extends CompilationInfo.Pair<String, Integer>> it = tokenList != null ? tokenList.listIterator(tokenList.size()) : null;
+        if (it != null && it.hasPrevious()) {
+            CompilationInfo.Pair<String, Integer> token = it.previous();
+            if (token.second < pos) {
+                switch (token.first) {
+                    case ">>>":
+                    case ">>":
+                    case ">":
+                        if (path.getLeaf().getKind() == Tree.Kind.MEMBER_SELECT || TreeUtilities.CLASS_TREE_KINDS.contains(path.getLeaf().getKind()) ||
+                                path.getLeaf().getKind() == Tree.Kind.MEMBER_REFERENCE || path.getLeaf().getKind() == Tree.Kind.GREATER_THAN)
+                            break;
+                    case ")":
+                        if (path.getLeaf().getKind() == Tree.Kind.PARENTHESIZED) {
+                            path = path.getParentPath();
+                            break;
+                        } else if (path.getLeaf().getKind() == Tree.Kind.ENHANCED_FOR_LOOP || path.getLeaf().getKind() == Tree.Kind.FOR_LOOP ||
+                                path.getLeaf().getKind() == Tree.Kind.IF || path.getLeaf().getKind() == Tree.Kind.WHILE_LOOP ||
+                                path.getLeaf().getKind() == Tree.Kind.DO_WHILE_LOOP || path.getLeaf().getKind() == Tree.Kind.TYPE_CAST ||
+                                path.getLeaf().getKind() == Tree.Kind.LAMBDA_EXPRESSION)
+                            break;
+                    case ";":
+                        if (path.getLeaf().getKind() == Tree.Kind.FOR_LOOP &&
+                                token.second <= sourcePositions.getStartPosition(path.getCompilationUnit(), ((ForLoopTree)path.getLeaf()).getUpdate().get(0)))
+                            break;
+                    case "}":
+                        path = path.getParentPath();
+                        switch (path.getLeaf().getKind()) {
+                            case CATCH:
+                                path = path.getParentPath();
+                            case METHOD:
+                            case FOR_LOOP:
+                            case ENHANCED_FOR_LOOP:
+                            case SYNCHRONIZED:
+                            case WHILE_LOOP:
+                            case TRY:
+                                path = path.getParentPath();
+                                break;
+                            case IF:
+                                do {
+                                    path = path.getParentPath();
+                                } while (path != null && path.getLeaf().getKind() == Tree.Kind.IF);
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
         return path;
     }
     
-//    /**Parses given type in given context.
-//     * 
-//     * @param expr type specification
-//     * @param scope in which simple names should be resolved
-//     * @return parsed {@link TypeMirror} or null if the given specification cannot be parsed
-//     */
-//    public TypeMirror parseType(String expr, TypeElement scope) {
-//        Enter enter = Enter.instance(info.getJavacTask().getContext());
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;        
-//        try {
-//            if (enter.getClassEnv((Symbol.TypeSymbol)scope) == null) {
-//                if (info.getTrees().getTree(scope) == null)
-//                    return null;
-//            }
-//            return info.getJavacTask().parseType(expr, scope);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//
-//    /**Parses given type in given context.
-//     *
-//     * @param expr type specification
-//     * @param scope in which simple names should be resolved
-//     * @return parsed {@link TypeMirror} or null if the given specification cannot be parsed
-//     */
-//    Tree parseType(String expr) {
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;
-//        try {
-//            return info.getJavacTask().parseType(expr);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//    
-//    /**Parses given statement.
-//     * 
-//     * @param stmt statement code
-//     * @param sourcePositions return value - new SourcePositions for the new tree
-//     * @return parsed {@link StatementTree} or null?
-//     */
-//    public StatementTree parseStatement(String stmt, SourcePositions[] sourcePositions) {
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;
-//        
-//        try {
-//            return (StatementTree)info.getJavacTask().parseStatement(stmt, sourcePositions);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//    
-//    /**Parses given expression.
-//     * 
-//     * @param expr expression code
-//     * @param sourcePositions return value - new SourcePositions for the new tree
-//     * @return parsed {@link ExpressionTree} or null?
-//     */
-//    public ExpressionTree parseExpression(String expr, SourcePositions[] sourcePositions) {
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;
-//        
-//        try {
-//            return (ExpressionTree) info.getJavacTask().parseExpression(expr, sourcePositions);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//    
-//    /**Parses given variable initializer.
-//     * 
-//     * @param init initializer code
-//     * @param sourcePositions return value - new SourcePositions for the new tree
-//     * @return parsed {@link ExpressionTree} or null?
-//     */
-//    public ExpressionTree parseVariableInitializer(String init, SourcePositions[] sourcePositions) {
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;
-//        
-//        try {
-//            return (ExpressionTree)info.getJavacTask().parseVariableInitializer(init, sourcePositions);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//
-//    /**Parses given static block.
-//     * 
-//     * @param block block code
-//     * @param sourcePositions return value - new SourcePositions for the new tree
-//     * @return parsed {@link BlockTree} or null?
-//     */
-//    public BlockTree parseStaticBlock(String block, SourcePositions[] sourcePositions) {
-//        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.impl.getJavacTask().getContext());
-//        int oldPos = jcMaker.pos;
-//        
-//        try {
-//            return (BlockTree)info.getJavacTask().parseStaticBlock(block, sourcePositions);
-//        } finally {
-//            jcMaker.pos = oldPos;
-//        }
-//    }
-//
-//    //XXX: parseAnnotationValue
+    /**Parses given type in given context.
+     * 
+     * @param expr type specification
+     * @param scope in which simple names should be resolved
+     * @return parsed {@link TypeMirror} or null if the given specification cannot be parsed
+     */
+    public TypeMirror parseType(String expr, TypeElement scope) {
+        Enter enter = Enter.instance(info.getJavacTask().getContext());
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;        
+        try {
+            if (enter.getClassEnv((Symbol.TypeSymbol)scope) == null) {
+                if (info.getTrees().getTree(scope) == null)
+                    return null;
+            }
+            return info.getJavacTask().parseType(expr + "\u0000", scope);
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+
+    /**Parses given type in given context.
+     *
+     * @param expr type specification
+     * @param scope in which simple names should be resolved
+     * @return parsed {@link TypeMirror} or null if the given specification cannot be parsed
+     */
+    Tree parseType(String expr) {
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;
+        try {
+            return info.getJavacTask().parseType(expr + "\u0000");
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+    
+    /**Parses given statement.
+     * 
+     * @param stmt statement code
+     * @param sourcePositions return value - new SourcePositions for the new tree
+     * @return parsed {@link StatementTree} or null?
+     */
+    public StatementTree parseStatement(String stmt, SourcePositions[] sourcePositions) {
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;
+        
+        try {
+            return (StatementTree)info.getJavacTask().parseStatement(stmt + "\u0000", sourcePositions);
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+    
+    /**Parses given expression.
+     * 
+     * @param expr expression code
+     * @param sourcePositions return value - new SourcePositions for the new tree
+     * @return parsed {@link ExpressionTree} or null?
+     */
+    public ExpressionTree parseExpression(String expr, SourcePositions[] sourcePositions) {
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;
+        
+        try {
+            return (ExpressionTree) info.getJavacTask().parseExpression(expr + "\u0000", sourcePositions);
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+    
+    /**Parses given variable initializer.
+     * 
+     * @param init initializer code
+     * @param sourcePositions return value - new SourcePositions for the new tree
+     * @return parsed {@link ExpressionTree} or null?
+     */
+    public ExpressionTree parseVariableInitializer(String init, SourcePositions[] sourcePositions) {
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;
+        
+        try {
+            return (ExpressionTree)info.getJavacTask().parseVariableInitializer(init + "\u0000", sourcePositions);
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+
+    /**Parses given static block.
+     * 
+     * @param block block code
+     * @param sourcePositions return value - new SourcePositions for the new tree
+     * @return parsed {@link BlockTree} or null?
+     */
+    public BlockTree parseStaticBlock(String block, SourcePositions[] sourcePositions) {
+        com.sun.tools.javac.tree.TreeMaker jcMaker = com.sun.tools.javac.tree.TreeMaker.instance(info.getJavacTask().getContext());
+        int oldPos = jcMaker.pos;
+        
+        try {
+            return (BlockTree)info.getJavacTask().parseStaticBlock(block + "\u0000", sourcePositions);
+        } finally {
+            jcMaker.pos = oldPos;
+        }
+    }
+
+    //XXX: parseAnnotationValue
     
     /**Computes {@link Scope} for the given position.
      */
@@ -507,72 +517,71 @@ public final class TreeUtilities {
         return scope;
     }
     
-//    public TypeMirror attributeTree(Tree tree, Scope scope) {
+    public TypeMirror attributeTree(Tree tree, Scope scope) {
 //        if (scope instanceof NBScope && ((NBScope)scope).areAccessibilityChecksDisabled()) {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).disableAccessibilityChecks();
 //        }
 //        try {
-//            return info.impl.getJavacTask().attributeTree((JCTree) tree, ((JavacScope) scope).getEnv());
+            return info.getJavacTask().attributeTree((JCTree) tree, ((JavacScope) scope).getEnv());
 //        } finally {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).restoreAccessbilityChecks();
 //        }
-//    }
-//    
-//    /**Attribute the given tree until the given <code>to</code> tree is reached.
-//     * Returns scope valid at point when <code>to</code> is reached.
-//     */
-//    public Scope attributeTreeTo(Tree tree, Scope scope, Tree to) {
+    }
+    
+    /**Attribute the given tree until the given <code>to</code> tree is reached.
+     * Returns scope valid at point when <code>to</code> is reached.
+     */
+    public Scope attributeTreeTo(Tree tree, Scope scope, Tree to) {
 //        if (scope instanceof NBScope && ((NBScope)scope).areAccessibilityChecksDisabled()) {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).disableAccessibilityChecks();
 //        }
 //        try {
-//            return info.impl.getJavacTask().attributeTreeTo((JCTree)tree, ((JavacScope)scope).getEnv(), (JCTree)to);
+            return info.getJavacTask().attributeTreeTo((JCTree)tree, ((JavacScope)scope).getEnv(), (JCTree)to);
 //        } finally {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).restoreAccessbilityChecks();
 //        }
-//    }
-//    
-//    public TypeMirror reattributeTree(Tree tree, Scope scope) {
-//        Env<AttrContext> env = ((JavacScope)scope).getEnv();
-//        copyInnerClassIndexes(env.tree, tree);
+    }
+    
+    public TypeMirror reattributeTree(Tree tree, Scope scope) {
+        Env<AttrContext> env = ((JavacScope)scope).getEnv();
+        copyInnerClassIndexes(env.tree, tree);
 //        if (scope instanceof NBScope && ((NBScope)scope).areAccessibilityChecksDisabled()) {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).disableAccessibilityChecks();
 //        }
 //        try {
-//            return info.impl.getJavacTask().attributeTree((JCTree)tree, env);
+            return info.getJavacTask().attributeTree((JCTree)tree, env);
 //        } finally {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).restoreAccessbilityChecks();
 //        }
-//    }
-//    
-//    public Scope reattributeTreeTo(Tree tree, Scope scope, Tree to) {
-//        Env<AttrContext> env = ((JavacScope)scope).getEnv();
-//        copyInnerClassIndexes(env.tree, tree);
+    }
+    
+    public Scope reattributeTreeTo(Tree tree, Scope scope, Tree to) {
+        Env<AttrContext> env = ((JavacScope)scope).getEnv();
+        copyInnerClassIndexes(env.tree, tree);
 //        if (scope instanceof NBScope && ((NBScope)scope).areAccessibilityChecksDisabled()) {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).disableAccessibilityChecks();
 //        }
 //        try {
-//            return info.impl.getJavacTask().attributeTreeTo((JCTree)tree, env, (JCTree)to);
+            return info.getJavacTask().attributeTreeTo((JCTree)tree, env, (JCTree)to);
 //        } finally {
 //            NBResolve.instance(info.impl.getJavacTask().getContext()).restoreAccessbilityChecks();
 //        }
-//    }
-//    
-//    /**Returns tokens for a given tree.
-//     */
-//    public TokenSequence<JavaTokenId> tokensFor(Tree tree) {
-//        return tokensFor(tree, info.getTrees().getSourcePositions());
-//    }
-//    
-//    /**Returns tokens for a given tree. Uses specified {@link SourcePositions}.
-//     */
-//    public TokenSequence<JavaTokenId> tokensFor(Tree tree, SourcePositions sourcePositions) {
-//        int start = (int)sourcePositions.getStartPosition(info.getCompilationUnit(), tree);
-//        int end   = (int)sourcePositions.getEndPosition(info.getCompilationUnit(), tree);
-//        
-//        return info.getTokenHierarchy().tokenSequence(JavaTokenId.language()).subSequence(start, end);
-//    }
-//    
+    }
+    
+    /**Returns tokens for a given tree.
+     */
+    public List<? extends CompilationInfo.Pair<String, Integer>> tokensFor(Tree tree) {
+        return tokensFor(tree, info.getTrees().getSourcePositions());
+    }
+    
+    /**Returns tokens for a given tree. Uses specified {@link SourcePositions}.
+     */
+    public List<? extends CompilationInfo.Pair<String, Integer>> tokensFor(Tree tree, SourcePositions sourcePositions) {
+        int start = (int)sourcePositions.getStartPosition(info.getCompilationUnit(), tree);
+        int end   = (int)sourcePositions.getEndPosition(info.getCompilationUnit(), tree);        
+        return info.getTokens(start, end);
+    }
+    
     /**
      * Checks whether the given element is accessible as a member of the given
      * type in a given scope.
@@ -1183,7 +1192,7 @@ public final class TreeUtilities {
 //
 //    }
 //    
-//    private void copyInnerClassIndexes(Tree from, Tree to) {
+    private void copyInnerClassIndexes(Tree from, Tree to) {
 //        final int[] fromIdx = {-3};
 //        TreeScanner<Void, Void> scanner = new TreeScanner<Void, Void>() {
 //            @Override
@@ -1225,8 +1234,8 @@ public final class TreeUtilities {
 //            }
 //        };
 //        scanner.scan(to, null);
-//    }
-//
+    }
+
     private static class UncaughtExceptionsVisitor extends TreePathScanner<Void, Set<TypeMirror>> {
         
         private final CompilationInfo info;

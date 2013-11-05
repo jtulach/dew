@@ -63,7 +63,7 @@ public class MainTest {
                 + "class X {\n"
                 + "    public static void main() { System.out.println(\"Hello brwsr!\"); }\n"
                 + "}";
-        JavacResult result = Main.doCompile("autocomplete", html, java, 53);
+        JavacResult result = Main.doCompile("autocomplete", html, java, 64);
         assertNotNull(result, "Null result");
 
         List<String> completions = result.getCompletions();

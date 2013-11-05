@@ -97,7 +97,13 @@ final class Compile {
 
     public Map<String, byte[]> getClasses() {
         if (classes == null) {
-            compile();
+            classes = new HashMap<>();
+            try {
+                info.toPhase(CompilationInfo.Phase.GENERATED);
+            } catch (IOException ioe) {}
+            for (MemoryFileObject generated : clfm.getGeneratedFiles(Kind.CLASS)) {
+                classes.put(generated.getName(), generated.getContent());
+            }
         }
         return classes;
     }
@@ -110,25 +116,17 @@ final class Compile {
      */
     public List<Diagnostic<? extends JavaFileObject>> getErrors() {
         if (errors == null) {
-            compile();
-        }
-        return errors;
-    }
-
-    private void compile() {
-        classes = new HashMap<>();
-        errors = new ArrayList<>();
-        try {
-            info.toPhase(CompilationInfo.Phase.GENERATED);
-        } catch (IOException ioe) {}
-        for (MemoryFileObject generated : clfm.getGeneratedFiles(Kind.CLASS)) {
-            classes.put(generated.getName(), generated.getContent());
-        }
-        for (Diagnostic<? extends JavaFileObject> diagnostic : info.getDiagnostics()) {
-            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-                errors.add(diagnostic);
+            errors = new ArrayList<>();
+            try {
+                info.toPhase(CompilationInfo.Phase.RESOLVED);
+            } catch (IOException ioe) {}
+            for (Diagnostic<? extends JavaFileObject> diagnostic : info.getDiagnostics()) {
+                if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                    errors.add(diagnostic);
+                }
             }
         }
+        return errors;
     }
 
     private static String find(String pref, char term, String java) throws IOException {
@@ -152,12 +150,7 @@ final class Compile {
         return html.replace("'${fqn}'", fqn);
     }
 
-    @Override
-    public String toString() {
-        if (getErrors().isEmpty()) {
-            return "Compiled: " + getClasses().keySet();
-        } else {
-            return "Compiled with errors: " + getErrors();
-        }
+    String getJava() {
+        return info != null ? info.getText() : null;
     }
 }
