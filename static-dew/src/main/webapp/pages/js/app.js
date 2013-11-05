@@ -149,6 +149,9 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
     
     $scope.run = function() {
+        if ($scope.classes === null) {
+            $scope.post('compile');
+        }
         if (!$scope.vm) {
             // initialize the VM
             var script = window.document.getElementById("brwsrvm");
@@ -217,8 +220,8 @@ function DevCtrl( $scope, $timeout, $http ) {
         editor.focus();
     };
     
-    $scope.noClasses = function() {
-        return $scope.classes === null;
+    $scope.someErrors = function() {
+        return $scope.errors !== null;
     };
     
     $scope.noModification = function() {
@@ -385,11 +388,18 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.pendingJavaHintInfo.callback({list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to});
             }
             $scope.pendingJavaHintInfo = null;
-        } else if (obj.classes && obj.classes.length > 0) {
-            $scope.classes = obj.classes;
+        } else if (obj.errors.length === 0 && 
+            (obj.type === "compile" || obj.type === "checkForErrors")
+        ) {
             $scope.errors = null;
             var editor = document.getElementById("editorJava").codeMirror;   
             editor.clearGutter( "issues" );
+            if (obj.classes !== null && obj.classes.length > 0) {
+                $scope.classes = obj.classes;
+                $scope.run();
+            } else {
+                $scope.classes = null;
+            }
         } else {
             $scope.classes = null;
             $scope.fail(obj.errors);
