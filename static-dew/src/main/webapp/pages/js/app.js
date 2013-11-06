@@ -149,11 +149,15 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
     
     $scope.run = function() {
-        if ($scope.classes === null) {
+        var classes = $scope.classes;
+        if (classes === null) {
             $scope.post('compile');
-            $timeout($scope.run, 100);
-            return;
+        } else {
+            $scope.runWithClasses(classes);
         }
+    };
+    
+    $scope.runWithClasses = function() {
         if (!$scope.vm) {
             // initialize the VM
             var script = window.document.getElementById("brwsrvm");
@@ -168,7 +172,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 if ($scope.classes) {
                     for (var i = 0; i < $scope.classes.length; i++) {
                         var c = $scope.classes[i];
-                        if (c.className == resource) {
+                        if (c.className === resource) {
                             return c.byteCode;
                         }
                     }
@@ -390,21 +394,26 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.pendingJavaHintInfo.callback({list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to});
             }
             $scope.pendingJavaHintInfo = null;
-        } else if (obj.errors.length === 0 && 
-            (obj.type === "compile" || obj.type === "checkForErrors")
-        ) {
+        } else if (obj.type === "compile") {
             $scope.errors = null;
-            var editor = document.getElementById("editorJava").codeMirror;   
-            editor.clearGutter( "issues" );
+            var editor = document.getElementById("editorJava").codeMirror;
+            editor.clearGutter("issues");
             if (obj.classes !== null && obj.classes.length > 0) {
                 $scope.classes = obj.classes;
-                $scope.run();
+                $scope.runWithClasses();
             } else {
                 $scope.classes = null;
+                $scope.fail(obj.errors);
             }
-        } else {
-            $scope.classes = null;
-            $scope.fail(obj.errors);
+        } else if (obj.type === "checkForErrors") {
+            if (obj.errors.length === 0) {
+                $scope.errors = null;
+                var editor = document.getElementById("editorJava").codeMirror;
+                editor.clearGutter("issues");
+            } else {
+                $scope.classes = null;
+                $scope.fail(obj.errors);
+            }
         }
         $scope.javac.running = false;
         if ($scope.javac.pending) {
@@ -428,6 +437,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             }
         }
         $scope.classes = null;
+        $scope.errors = [];
         localStorage.gistid = $scope.gistid;
         localStorage.java = $scope.java;
         localStorage.html = $scope.html;
