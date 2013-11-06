@@ -151,6 +151,8 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.run = function() {
         if ($scope.classes === null) {
             $scope.post('compile');
+            $timeout($scope.run, 100);
+            return;
         }
         if (!$scope.vm) {
             // initialize the VM
