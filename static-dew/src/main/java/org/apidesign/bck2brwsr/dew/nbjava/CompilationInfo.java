@@ -86,7 +86,6 @@ public final class CompilationInfo {
     private CompilationUnitTree compilationUnit;
 
     private JavacTaskImpl javacTask;
-    private Trees trees;
     private ElementUtilities elementUtilities;
     private TreeUtilities treeUtilities;
     private TypeUtilities typeUtilities;
@@ -95,7 +94,7 @@ public final class CompilationInfo {
 //    private final FileObject root;
     private final JavaFileObject jfo;
     private final JavaFileManager jfm;
-    private final DiagnosticListenerImpl diagnosticListener = new DiagnosticListenerImpl();
+    private DiagnosticListenerImpl diagnosticListener = new DiagnosticListenerImpl();
 //    //@NotThreadSafe    //accessed under parser lock
 //    private Snapshot snapshot;
 //    private final JavacParser parser;
@@ -259,11 +258,8 @@ public final class CompilationInfo {
      * Return the {@link Trees} service of the javac represented by this {@link CompilationInfo}.
      * @return javac Trees service
      */
-    public synchronized Trees getTrees() {
-        if (trees == null) {
-            trees = JavacTrees.instance(getJavacTask().getContext());
-        }
-        return trees;
+    public Trees getTrees() {
+        return JavacTrees.instance(getJavacTask().getContext());
     }
     
     /**
@@ -478,6 +474,14 @@ public final class CompilationInfo {
      */
     void setPhase(final Phase phase) {
         assert phase != null;
+        if (phase == Phase.MODIFIED) {
+            this.compilationUnit = null;
+            this.diagnosticListener = new DiagnosticListenerImpl();
+            this.javacTask = null;
+            this.elementUtilities = null;
+            this.treeUtilities = null;
+            this.typeUtilities = null;
+        }
         this.phase = phase;
     }
     
