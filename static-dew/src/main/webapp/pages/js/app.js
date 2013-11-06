@@ -377,32 +377,41 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.applyCompletion = function(cmpltn, info) {
         var editor = document.getElementById("editorJava").codeMirror;
         editor.replaceRange(cmpltn, info.from, info.to);
+        editor.focus();
+    };
+    $scope.computeCompletion = function() {
+      $scope.post("autocomplete");
     };
     CodeMirror.registerHelper("hint", "clike", $scope.javaHint);
 
     $scope.javac.onmessage = function(ev) {
+        var editor = document.getElementById("editorJava").codeMirror;
         var obj = ev.data;
         $scope.status = obj.status;
         if (obj.type === 'autocomplete') {
-            if ($scope.pendingJavaHintInfo && obj.completions) {
-                var list;
-                if ($scope.pendingJavaHintInfo.prefix) {
-                    var pref = $scope.pendingJavaHintInfo.prefix;
-                    list = [];
-                    for(var i = 0; i < obj.completions.length; ++i) {
-                        if (obj.completions[i].slice(0, pref.length) === pref)
-                            list[list.length] = obj.completions[i];
+            if (obj.completions) {
+                var list = obj.completions;
+                var from = editor.getCursor();
+                var to = editor.getCursor();
+                if ($scope.pendingJavaHintInfo) {
+                    var list;
+                    if ($scope.pendingJavaHintInfo.prefix) {
+                        var pref = $scope.pendingJavaHintInfo.prefix;
+                        list = [];
+                        for(var i = 0; i < obj.completions.length; ++i) {
+                            if (obj.completions[i].slice(0, pref.length) === pref)
+                                list[list.length] = obj.completions[i];
+                        }
                     }
-                } else {
-                    list = obj.completions;
-                }
-                $scope.completions = {list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to};
-                $scope.pendingJavaHintInfo.callback($scope.completions);
+                    from = $scope.pendingJavaHintInfo.from;
+                    to = $scope.pendingJavaHintInfo.to;
+                    $scope.pendingJavaHintInfo.callback($scope.completions);
+                } 
+                $scope.completions = {list: list.slice(0, 10), from: from, to: to};
             }
             $scope.pendingJavaHintInfo = null;
         } else if (obj.type === "compile") {
             $scope.errors = null;
-            var editor = document.getElementById("editorJava").codeMirror;
             editor.clearGutter("issues");
             if (obj.classes !== null && obj.classes.length > 0) {
                 $scope.classes = obj.classes;
@@ -434,7 +443,13 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.javac.pending = true;
         } else {
             var editor = document.getElementById("editorJava").codeMirror;
-            var off = editor.indexFromPos(t === 'autocomplete' ? $scope.pendingJavaHintInfo.from : editor.getCursor());
+            if ($scope.computeCompletion) {
+                editor.on("cursorActivity", $scope.computeCompletion);
+                $scope.computeCompletion = null;
+            }
+            var off = editor.indexFromPos(t === 'autocomplete' && $scope.pendingJavaHintInfo ? 
+                $scope.pendingJavaHintInfo.from : editor.getCursor()
+            );
             $scope.javac.postMessage({ type : t, html : $scope.html, java : $scope.java, offset : off});
             $scope.javac.running = true;
             if ($scope.status.indexOf('Init') < 0) {
@@ -442,12 +457,13 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.$apply("");
             }
         }
-        $scope.completions = null;
-        $scope.classes = null;
-        $scope.errors = [];
-        localStorage.gistid = $scope.gistid;
-        localStorage.java = $scope.java;
-        localStorage.html = $scope.html;
+        if (t !== 'autocomplete') {
+            $scope.classes = null;
+            $scope.errors = [];
+            localStorage.gistid = $scope.gistid;
+            localStorage.java = $scope.java;
+            localStorage.html = $scope.html;
+        }
     };
 
     CodeMirror.commands.autocomplete = function(cm) {
