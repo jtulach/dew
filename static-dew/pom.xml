@@ -10,16 +10,16 @@
 
   <groupId>org.apidesign.bck2brwsr.dew</groupId>
   <artifactId>static-dew</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>DEW with Javac</name>
 
   <repositories>
       <repository>
-          <id>java.net</id>
-          <name>Java.net</name>
-          <url>https://maven.java.net/content/repositories/releases/</url>
+          <id>nb8</id>
+          <name>NetBeans 8</name>
+          <url>http://bits.netbeans.org/nexus/content/repositories/snapshots/</url>
           <snapshots>
               <enabled>true</enabled>
           </snapshots>
@@ -176,7 +176,7 @@
     <dependency>
         <groupId>org.netbeans.external</groupId>
         <artifactId>nb-javac-impl</artifactId>
-        <version>RELEASE74</version>
+        <version>dev-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <profiles>
