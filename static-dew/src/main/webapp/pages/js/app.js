@@ -351,6 +351,7 @@ function DevCtrl( $scope, $timeout, $http ) {
     }
     $scope.classes = null;
     $scope.status = 'Initializing compiler...';
+    $scope.completions = null;
     if (typeof SharedWorker === 'undefined') {
       var w = new Worker('privatecompiler.js', 'javac');
       $scope.javac = w;
@@ -373,6 +374,10 @@ function DevCtrl( $scope, $timeout, $http ) {
         $scope.pendingJavaHintInfo = {callback: fn, from: CodeMirror.Pos(cur.line, start), to: CodeMirror.Pos(cur.line, end), prefix: pref};
         $scope.post('autocomplete');
     };
+    $scope.applyCompletion = function(cmpltn, info) {
+        var editor = document.getElementById("editorJava").codeMirror;
+        editor.replaceRange(cmpltn, info.from, info.to);
+    };
     CodeMirror.registerHelper("hint", "clike", $scope.javaHint);
 
     $scope.javac.onmessage = function(ev) {
@@ -391,7 +396,8 @@ function DevCtrl( $scope, $timeout, $http ) {
                 } else {
                     list = obj.completions;
                 }
-                $scope.pendingJavaHintInfo.callback({list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to});
+                $scope.completions = {list: list, from: $scope.pendingJavaHintInfo.from, to: $scope.pendingJavaHintInfo.to};
+                $scope.pendingJavaHintInfo.callback($scope.completions);
             }
             $scope.pendingJavaHintInfo = null;
         } else if (obj.type === "compile") {
@@ -436,6 +442,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.$apply("");
             }
         }
+        $scope.completions = null;
         $scope.classes = null;
         $scope.errors = [];
         localStorage.gistid = $scope.gistid;
