@@ -10,7 +10,7 @@
 
   <groupId>org.apidesign.bck2brwsr.dew</groupId>
   <artifactId>static-dew</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>DEW with Javac</name>
