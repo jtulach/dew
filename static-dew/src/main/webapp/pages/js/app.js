@@ -153,8 +153,21 @@ function DevCtrl( $scope, $timeout, $http ) {
         if (classes === null) {
             $scope.post('compile');
         } else {
-            $scope.runWithClasses(classes);
+            $scope.runWithClasses();
         }
+    };
+    
+    $scope.loadResourceFromClasses = function(resource) {
+        resource = resource.toString(); // from java.lang.String to JS string
+        if ($scope.classes) {
+            for (var i = 0; i < $scope.classes.length; i++) {
+                var c = $scope.classes[i];
+                if (c.className === resource) {
+                    return c.byteCode;
+                }
+            }
+        }
+        return null;
     };
     
     $scope.runWithClasses = function() {
@@ -167,18 +180,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $timeout($scope.run, 100);
                 return;
             }
-            
-            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', function(resource) {
-                if ($scope.classes) {
-                    for (var i = 0; i < $scope.classes.length; i++) {
-                        var c = $scope.classes[i];
-                        if (c.className === resource) {
-                            return c.byteCode;
-                        }
-                    }
-                }
-                return null;
-            });
+            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', $scope.loadResourceFromClasses);
         }
         var vm = $scope.vm;
         
