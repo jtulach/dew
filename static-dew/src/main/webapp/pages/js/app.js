@@ -354,6 +354,10 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.classes = null;
     $scope.status = 'Initializing compiler...';
     $scope.completions = null;
+    $scope.littleCompletions = function() {
+        return $scope.completions === null || $scope.completions.list === null || $scope.completions.list.length < 10;
+    };
+            
     if (typeof SharedWorker === 'undefined') {
       var w = new Worker('privatecompiler.js', 'javac');
       $scope.javac = w;
@@ -407,9 +411,12 @@ function DevCtrl( $scope, $timeout, $http ) {
                     }
                     from = $scope.pendingJavaHintInfo.from;
                     to = $scope.pendingJavaHintInfo.to;
-                    $scope.pendingJavaHintInfo.callback($scope.completions);
+                    $scope.pendingJavaHintInfo.callback({list: list, from: from, to: to, more: null});
                 } 
-                $scope.completions = {list: list.slice(0, 10), from: from, to: to};
+                var showHint = list.length <= 10 ? null : function() {
+                    CodeMirror.showHint(editor, null, {async: true});
+                }
+                $scope.completions = {list: list.slice(0, 10), from: from, to: to, more: showHint };
             }
             $scope.pendingJavaHintInfo = null;
         } else if (obj.type === "compile") {

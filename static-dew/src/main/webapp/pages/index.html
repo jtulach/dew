@@ -88,6 +88,9 @@
                     <span ng-repeat="c in completions.list">
                         <button class="btn-info" ng-click="applyCompletion(c, completions)">{{c}}</button>
                     </span>
+                    <span ng-hide="littleCompletions()">
+                        <a class="help-inline" ng-click="completions.more()">Ctrl-Space for more</a>...
+                    </span>
                     <div class="alert alert-error" ng-show="doc.modelError">
                         <small>{{doc.modelError.toString()}}</small>
                     </div>
