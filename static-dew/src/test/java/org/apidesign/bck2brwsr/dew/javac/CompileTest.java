@@ -64,7 +64,9 @@ public class CompileTest  {
             + "   class I4 {}\n"
             + "   class I5 {}\n"
             + "}\n";
-        org.apidesign.bck2brwsr.dew.javac.JavacResult result = org.apidesign.bck2brwsr.dew.javac.Main.doCompile("compile", html, java, 0);
+        JavacResult result = JavacEndpoint.newCompiler().doCompile(
+            new JavacQuery(JavacEndpoint.MsgType.compile, null, html, java, 0)
+        );
         assertEquals(result.getClasses().size(), 6, "Six classes generated");
         assertEquals(result.getClasses().get(0).getClassName(), "x/y/z/X.class", "Main class is the first one");
     }

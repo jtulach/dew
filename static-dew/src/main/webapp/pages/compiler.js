@@ -19,19 +19,24 @@ importScripts('bck2brwsr.js');
 
 window = {};
 
-var vm = bck2brwsr('${project.build.finalName}.jar');
-vm.loadClass('org.apidesign.bck2brwsr.dew.javac.Main');
+(function() {
+    // init the bck2brwsr VM and compiler
+    var vm = bck2brwsr('${project.build.finalName}.jar');
+    vm.loadClass('org.apidesign.bck2brwsr.dew.javac.JavacEndpoint');
+})(this);
 
 function initCompiler(port) {
-    if (!window.javac) {
+    if (!window.createJavac) {
         port.postMessage({ "status" : "No Javac defined!", classes : [], "errors" : [] });
         throw 'No Javac defined!';
     }
+    
+    var javac = window.createJavac();
 
     port.postMessage({ "status" : "Ready!", classes : [], "errors" : [] });
     port.onmessage = function(ev) {
         try {
-            var res = window.javac.compile(ev.data.type, ev.data.html, ev.data.java, ev.data.offset);
+            var res = javac.compile(ev.data);
             res = eval("(" + res.toString() + ")");
             port.postMessage(res);
         } catch (err) {

@@ -38,7 +38,9 @@ public class MainTest {
                 + "class X {"
                 + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }"
                 + "}";
-        JavacResult result = Main.doCompile("compile", html, java, 0);
+        JavacResult result = JavacEndpoint.newCompiler().doCompile(
+            new JavacQuery(JavacEndpoint.MsgType.compile, null, html, java, 0)
+        );
         assertNotNull(result, "Null result");
 
         List<JavacClass> classes = result.getClasses();
@@ -63,7 +65,9 @@ public class MainTest {
                 + "class X {\n"
                 + "    public static void main() { System.out.println(\"Hello brwsr!\"); }\n"
                 + "}";
-        JavacResult result = Main.doCompile("autocomplete", html, java, 64);
+        JavacResult result = JavacEndpoint.newCompiler().doCompile(
+            new JavacQuery(JavacEndpoint.MsgType.autocomplete, null, html, java, 64)
+        );
         assertNotNull(result, "Null result");
 
         List<String> completions = result.getCompletions();

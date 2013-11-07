@@ -26,17 +26,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.Property;
 
-/**
+/** The end point one can use to communicate with Javac service.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Main {
-    private static final Logger LOG = Logger.getLogger(Main.class.getName());
-    private static Compile c = null;
+public final class JavacEndpoint {
+    private static final Logger LOG = Logger.getLogger(JavacEndpoint.class.getName());
+    private Compile c = null;
+    
+    private JavacEndpoint() {
+    }
     
     static {
         LOG.info("Registering Javac");
@@ -44,35 +49,53 @@ public final class Main {
         LOG.info("Javac service is available!");
     }
     
+    static JavacEndpoint newCompiler() {
+        return new JavacEndpoint();
+    }
+    
 
     @JavaScriptBody(args = {}, javacall = true, body = 
-        "window.javac = {};\n"
-      + "window.javac.compile = function(type,html,java,offset) {\n"
-      + "  return @org.apidesign.bck2brwsr.dew.javac.Main::doCompile(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)(type,html,java,offset);\n"
+        "window.createJavac = function() {\n"
+      + "  var compiler = @org.apidesign.bck2brwsr.dew.javac.JavacEndpoint::newCompiler()();\n"
+      + "  this.compile = function(q) {\n"
+      + "    return compiler.@org.apidesign.bck2brwsr.dew.javac.JavacEndpoint::doCompile(Ljava/lang/Object;)(q);\n"
+      + "  };\n"
+      + "  return this;\n"
       + "}\n"
     )
     private static void registerJavacService() {
     }
     
-    static JavacResult doCompile(String type, String html, String java, int offset) throws IOException {
+    JavacResult doCompile(Object query) throws IOException {
+        JavacQuery q = Models.fromRaw(BrwsrCtx.findDefault(JavacQuery.class), JavacQuery.class, query);
+        return doCompile(q);
+    }
+    
+    public JavacResult doCompile(JavacQuery query) throws IOException {
         JavacResult res = new JavacResult();
-        res.setType(type);
+        res.setType(query.getType());
+        res.setState(query.getState());
+        
+        String java = query.getJava();
+        String html = query.getHtml();
+        int offset = query.getOffset();
+        
         if (c == null || !java.equals(c.getJava())) {
             c = Compile.create(html, java);
         }
-        switch (type) {
-            case "autocomplete":
+        switch (query.getType()) {
+            case autocomplete:
                 LOG.info("Autocomplete");
                 res.getCompletions().addAll(c.getCompletions(offset));
                 res.setStatus("Autocomplete finished.");
                 return res;
-            case "checkForErrors":
+            case checkForErrors:
                 for (Diagnostic<? extends JavaFileObject> d : c.getErrors()) {
                     res.getErrors().add(JavacErrorModel.create(d));
                 }
                 res.setStatus(res.getErrors().isEmpty() ? "OK. No errors found." : "There are errors!");
                 return res;
-            case "compile":
+            case compile:
                 LOG.log(Level.INFO, "Compiled {0}", c);
                 for (Map.Entry<String, byte[]> e : c.getClasses().entrySet()) {
                     List<Byte> arr = new ArrayList<>(e.getValue().length);
@@ -94,8 +117,28 @@ public final class Main {
         return res;
     }
     
+    
+    //
+    // protocol interfaces
+    //
+    
+    enum MsgType {
+        autocomplete, checkForErrors, compile;
+    }
+
+    @Model(className = "JavacQuery", properties = {
+        @Property(name = "type", type = MsgType.class),
+        @Property(name = "state", type = String.class),
+        @Property(name = "html", type = String.class),
+        @Property(name = "java", type = String.class),
+        @Property(name = "offset", type = int.class)
+    })
+    static final class JavacQueryModel {
+    }
+
     @Model(className = "JavacResult", properties = {
-        @Property(name = "type", type = String.class),
+        @Property(name = "type", type = MsgType.class),
+        @Property(name = "state", type = String.class),
         @Property(name = "status", type = String.class),
         @Property(name = "errors", type = JavacError.class, array = true),
         @Property(name = "classes", type = JavacClass.class, array = true),
@@ -103,9 +146,9 @@ public final class Main {
     })
     static final class JavacResultModel {
     }
-    
+
     @Model(className = "JavacError", properties = {
-        @Property(name = "col", type= long.class),
+        @Property(name = "col", type = long.class),
         @Property(name = "line", type = long.class),
         @Property(name = "kind", type = Diagnostic.Kind.class),
         @Property(name = "msg", type = String.class)
@@ -113,18 +156,19 @@ public final class Main {
     static final class JavacErrorModel {
         static JavacError create(Diagnostic<? extends JavaFileObject> d) {
             return new JavacError(
-                d.getColumnNumber(),
-                d.getLineNumber(),
-                d.getKind(),
-                d.getMessage(Locale.ENGLISH)
+                    d.getColumnNumber(),
+                    d.getLineNumber(),
+                    d.getKind(),
+                    d.getMessage(Locale.ENGLISH)
             );
         }
     }
-    
+
     @Model(className = "JavacClass", properties = {
         @Property(name = "className", type = String.class),
         @Property(name = "byteCode", type = byte.class, array = true)
     })
     static final class JavacClassModel {
     }
+    
 }

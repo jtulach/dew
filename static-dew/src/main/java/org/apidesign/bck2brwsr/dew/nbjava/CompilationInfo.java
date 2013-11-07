@@ -73,7 +73,7 @@ import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.parser.Scanner;
 import com.sun.tools.javac.parser.ScannerFactory;
 import com.sun.tools.javac.parser.Tokens;
-import org.apidesign.bck2brwsr.dew.javac.Main;
+import org.apidesign.bck2brwsr.dew.javac.JavacEndpoint;
 
 /**
  *
@@ -81,7 +81,7 @@ import org.apidesign.bck2brwsr.dew.javac.Main;
  */
 public final class CompilationInfo {
 
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(JavacEndpoint.class.getName());
     private Phase phase = Phase.MODIFIED;
     private CompilationUnitTree compilationUnit;
 
