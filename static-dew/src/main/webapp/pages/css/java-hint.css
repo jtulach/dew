@@ -1,0 +1,127 @@
+.Java-hint {
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 20px;
+}
+.Deprecated {
+  text-decoration:line-through;
+}
+.Own {
+  font-weight: bolder;
+}
+.Keyword {
+  color: rgb(0,0,153);
+  background-image: url("../img/java_keyword.png");
+}
+.Package {
+  color: rgb(0,86,0);
+  background-image: url("../img/java_package.png");
+}
+.Class {
+  color: rgb(86,0,0);
+  background-image: url("../img/java_class.png");
+}
+.Interface {
+  color: rgb(64,64,64);
+  background-image: url("../img/java_interface.png");
+}
+.Enum {
+  color: rgb(86,0,0);
+  background-image: url("../img/java_enum.png");
+}
+.AnnotationType {
+  color: rgb(86,0,0);
+  background-image: url("../img/java_annotation_type.png");
+}
+.TypeParameter {
+  color: black;
+  background-image: url("../img/java_annotation_type.png");
+}
+.LocalVarible {
+  color: rgb(0,0,124);
+  background-image: url("../img/java_annotation_type.png");
+}
+.Method {
+  color: black;
+  background-image: url("../img/java_method.png");
+}
+.MethodPackagePrivate {
+  color: black;
+  background-image: url("../img/java_method_package_private.png");
+}
+.MethodPrivate {
+  color: black;
+  background-image: url("../img/java_method_private.png");
+}
+.MethodProtected {
+  color: black;
+  background-image: url("../img/java_method_protected.png");
+}
+.MethodStatic {
+  color: black;
+  background-image: url("../img/java_method_static.png");
+}
+.MethodStaticPackagePrivate {
+  color: black;
+  background-image: url("../img/java_method_static_package_private.png");
+}
+.MethodStaticPrivate {
+  color: black;
+  background-image: url("../img/java_method_static_private.png");
+}
+.MethodStaticProtected {
+  color: black;
+  background-image: url("../img/java_method_static_protected.png.png");
+}
+.Field {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field.png");
+}
+.FieldPackagePrivate {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_package_private.png");
+}
+.FieldPrivate {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_private.png");
+}
+.FieldProtected {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_protected.png");
+}
+.FieldStatic {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_static.png");
+}
+.FieldStaticPackagePrivate {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_static_package_private.png");
+}
+.FieldStaticPrivate {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_static_private.png");
+}
+.FieldStaticProtected {
+  color: rgb(0,134,24);
+  background-image: url("../img/java_field_static_protected.png");
+}
+.Constructor {
+  color: rgb(178,139,0);
+  background-image: url("../img/java_constructor.png");
+}
+.ConstructorPackagePrivate {
+  color: rgb(178,139,0);
+  background-image: url("../img/java_constructor_package_private.png");
+}
+.ConstructorPrivate {
+  color: rgb(178,139,0);
+  background-image: url("../img/java_constructor_private.png");
+}
+.ConstructorProtected {
+  color: rgb(178,139,0);
+  background-image: url("../img/java_constructor_protected.png");
+}
+.Attribute {
+  color: rgb(64,64,64);
+  background-image: url("../img/java_attribute.png");
+}

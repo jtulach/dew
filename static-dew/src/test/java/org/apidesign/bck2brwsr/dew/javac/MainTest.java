@@ -58,8 +58,8 @@ public class MainTest {
         }
     }
 
-    @Test
-    public void testAutocomplete() throws IOException {
+    @Compare
+    public int testAutocomplete() throws IOException {
         String html = "";
         String java = "package x.y.z;\n"
                 + "class X {\n"
@@ -70,8 +70,8 @@ public class MainTest {
         );
         assertNotNull(result, "Null result");
 
-        List<String> completions = result.getCompletions();
-//        return completions.size();
+        List<CompletionItem> completions = result.getCompletions();
+        return completions.size();
     }
 
     @Factory public static Object[] create() {

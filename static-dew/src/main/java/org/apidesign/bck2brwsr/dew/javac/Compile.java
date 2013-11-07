@@ -31,6 +31,8 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
+
+import org.apidesign.bck2brwsr.dew.nbjava.JavaCompletionItem;
 import org.apidesign.bck2brwsr.dew.nbjava.JavaCompletionQuery;
 
 /**
@@ -83,7 +85,7 @@ final class Compile {
         return new Compile(html, code);
     }
 
-    public List<? extends String> getCompletions(int offset) {
+    public List<? extends JavaCompletionItem> getCompletions(int offset) {
         try {
             return JavaCompletionQuery.query(info, JavaCompletionQuery.COMPLETION_QUERY_TYPE, offset);
         } catch (Exception e) {}

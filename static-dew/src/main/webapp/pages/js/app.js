@@ -148,6 +148,10 @@ function DevCtrl( $scope, $timeout, $http ) {
         
     };
     
+    $scope.compile = function() {
+        $scope.post('compile');        
+    }
+    
     $scope.run = function() {
         var classes = $scope.classes;
         if (classes === null) {
@@ -405,7 +409,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                         var pref = $scope.pendingJavaHintInfo.prefix;
                         list = [];
                         for(var i = 0; i < obj.completions.length; ++i) {
-                            if (obj.completions[i].slice(0, pref.length) === pref)
+                            if (obj.completions[i].text.slice(0, pref.length) === pref)
                                 list[list.length] = obj.completions[i];
                         }
                     }

@@ -32,6 +32,8 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 
+import org.apidesign.bck2brwsr.dew.nbjava.JavaCompletionItem;
+
 /** The end point one can use to communicate with Javac service.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
@@ -86,7 +88,9 @@ public final class JavacEndpoint {
         switch (query.getType()) {
             case autocomplete:
                 LOG.info("Autocomplete");
-                res.getCompletions().addAll(c.getCompletions(offset));
+                for (JavaCompletionItem jci : c.getCompletions(offset)) {
+                    res.getCompletions().add(jci.toCompletionItem());
+                }
                 res.setStatus("Autocomplete finished.");
                 return res;
             case checkForErrors:
@@ -142,7 +146,7 @@ public final class JavacEndpoint {
         @Property(name = "status", type = String.class),
         @Property(name = "errors", type = JavacError.class, array = true),
         @Property(name = "classes", type = JavacClass.class, array = true),
-        @Property(name = "completions", type = String.class, array = true)
+        @Property(name = "completions", type = CompletionItem.class, array = true)
     })
     static final class JavacResultModel {
     }
@@ -169,6 +173,14 @@ public final class JavacEndpoint {
         @Property(name = "byteCode", type = byte.class, array = true)
     })
     static final class JavacClassModel {
+    }
+    
+    @Model(className = "CompletionItem", properties = {
+        @Property(name = "text", type = String.class),
+        @Property(name = "displayText", type = String.class),
+        @Property(name = "className", type = String.class),
+    })
+    static final class CompletionItemModel {
     }
     
 }
