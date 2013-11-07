@@ -386,7 +386,7 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
     $scope.applyCompletion = function(cmpltn, info) {
         var editor = document.getElementById("editorJava").codeMirror;
-        editor.replaceRange(cmpltn, info.from, info.to);
+        editor.replaceRange(cmpltn.text, info.from, info.to);
         editor.focus();
     };
     $scope.computeCompletion = function() {
