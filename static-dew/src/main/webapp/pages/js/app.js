@@ -299,25 +299,36 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.url = "http://dew.apidesign.org";
     $scope.description = "Development Environment for Web";
     
-    var gist = window.location.hash;
-    if (!gist) {
-        if (localStorage.gistid) {
-            $scope.gistid = localStorage.gistid;
-            $scope.java = localStorage.java;
-            $scope.html = localStorage.html;
+    {
+        var samples;
+        var gist = window.location.hash;
+        if (gist) {
+            // remove leading #
+            $scope.gistid = gist.substring(1);
+            samples = $scope.samples = [{
+                    "description": "Preselected sample",
+                    "id": $scope.gistid
+                }];
+            $scope.loadGist();
         } else {
-            $scope.gistid = "-1";
-        }
-        $scope.samples = [{
-            "description" : "Loading samples...",
-            "id" : "-1"
-        }];
-        var samples = [
-            {
-               "description" : "Choose a sample...",
-               "id" : ""
+            if (localStorage.gistid) {
+                $scope.gistid = localStorage.gistid;
+                $scope.java = localStorage.java;
+                $scope.html = localStorage.html;
+            } else {
+                $scope.gistid = "-1";
             }
-        ];
+            $scope.samples = [{
+                    "description": "Loading samples...",
+                    "id": "-1"
+                }];
+            samples = [
+                {
+                    "description": "Choose a sample...",
+                    "id": ""
+                }
+            ];
+        }
         var loadSamples = function(res) {
             for (var i = 0; i < res.length; i++) {
                 samples.push(res[i]);
@@ -341,14 +352,6 @@ function DevCtrl( $scope, $timeout, $http ) {
             }
             $scope.$apply("");
         };
-    } else {
-        // remove leading #
-        $scope.gistid = gist.substring(1);
-        $scope.samples = [{
-            "description" : "Preselected sample",
-            "id" : $scope.gistid
-        }];
-        $scope.loadGist();
     }
 
     if (!$scope.html) {
