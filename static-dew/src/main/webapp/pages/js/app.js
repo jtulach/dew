@@ -334,7 +334,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 samples.push(res[i]);
             }
             $scope.samples = samples;
-            $scope.gistid = "";
+//            $scope.gistid = "";
         };
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://api.github.com/users/jtulach/gists");
