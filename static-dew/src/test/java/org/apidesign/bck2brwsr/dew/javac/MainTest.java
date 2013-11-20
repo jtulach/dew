@@ -18,6 +18,7 @@
 package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apidesign.bck2brwsr.vmtest.Compare;
@@ -59,11 +60,12 @@ public class MainTest {
     }
 
     @Compare
-    public int testAutocomplete() throws IOException {
+    public String testAutocomplete() throws IOException {
         String html = "";
         String java = "package x.y.z;\n"
                 + "class X {\n"
-                + "    public static void main() { System.out.println(\"Hello brwsr!\"); }\n"
+                + "    public static void main() {new X().runMe(); }\n"
+                + "    public void runMe() {};\n"
                 + "}";
         JavacResult result = JavacEndpoint.newCompiler().doCompile(
             new JavacQuery(JavacEndpoint.MsgType.autocomplete, null, html, java, 64)
@@ -71,7 +73,13 @@ public class MainTest {
         assertNotNull(result, "Null result");
 
         List<CompletionItem> completions = result.getCompletions();
-        return completions.size();
+        
+        List<String> res = new ArrayList<>(completions.size());
+        for (CompletionItem i : completions) {
+            res.add(i.getText());
+        }
+        
+        return res.toString();
     }
 
     @Factory public static Object[] create() {
