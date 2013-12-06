@@ -97,6 +97,12 @@ function DevCtrl( $scope, $timeout, $http ) {
 "  /*int*/ myFirstError;\n" +
 "}\n";
 
+    function conditionalApply() {
+        if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
+            $scope.$apply();
+        }
+    }
+
     function parseJson(s) {
       if (typeof s === 'string') {
         return JSON.parse(s);
@@ -350,8 +356,8 @@ function DevCtrl( $scope, $timeout, $http ) {
                 var rsp = parseJson(xhr.response);
                 loadSamples(rsp);
             }
-            $scope.$apply("");
-        };
+            conditionalApply();
+       };
     }
 
     if (!$scope.html) {
@@ -451,7 +457,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.javac.pending = false;
             $scope.post();
         }
-        $scope.$apply("");
+        conditionalApply();
     };
     $scope.post = function(t) {
         t = t || 'checkForErrors';
@@ -470,7 +476,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.javac.running = true;
             if ($scope.status.indexOf('Init') < 0) {
                 $scope.status = 'Compiling...';
-                $scope.$apply("");
+                conditionalApply();
             }
         }
         if (t !== 'autocomplete') {
