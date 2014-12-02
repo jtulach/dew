@@ -26,8 +26,8 @@ public final class Main {
     public static void main(String... args) throws Exception {
         BrowserBuilder.newBrowser().
             loadPage("pages/index.html").
-            loadClass(Main.class).
-            invoke("onPageLoad", args).
+            loadClass(Editor.class).
+            invoke("main", args).
             showAndWait();
         System.exit(0);
     }

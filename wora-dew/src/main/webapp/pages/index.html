@@ -25,12 +25,19 @@
     </head>
     <body>
         <h1>DEW Attempt</h1>
+        
+        <span data-bind="text: result"></span>
+        <textarea cols="80" rows="25" data-bind="value: code">
+        </textarea>
+        <p>
+        <button data-bind="click: compile">Compile!</button>
+        </p>
         <!-- boot bck2brwsr -->
         <script type="text/javascript" src="bck2brwsr.js"></script>
         <script>
             var vm = bck2brwsr('wora-dew.js');
-            var c = vm.loadClass('org.apidesign.bck2brwsr.dew.javac.Main');
-            c.invoke('onPageLoad');
+            var c = vm.loadClass('org.apidesign.bck2brwsr.dew.javac.Editor');
+            c.invoke('main');
         </script>
     </body>
 </html>

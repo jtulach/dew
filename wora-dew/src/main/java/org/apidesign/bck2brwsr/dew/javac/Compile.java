@@ -88,17 +88,9 @@ final class Compile {
     /** Adds a Maven artifact in the class path
     */
     public final void addClassPathElement(
-        String groupId, String artifactId, String version, String spec
+        String groupId, String artifactId, String version, String classifier
     ) {
-        clfm.addCp(new ClassLoaderFileManager.CP(groupId, artifactId, version, spec));
-    }
-
-    /** Adds a Maven artifact in the class path
-    */
-    public final void addBootClassPathElement(
-        String groupId, String artifactId, String version, String spec
-    ) {
-        clfm.addCp(new ClassLoaderFileManager.CP(groupId, artifactId, version, spec));
+        clfm.addCp(new ClassLoaderFileManager.CP(groupId, artifactId, version, classifier));
     }
 
     public List<? extends JavaCompletionItem> getCompletions(int offset) {
