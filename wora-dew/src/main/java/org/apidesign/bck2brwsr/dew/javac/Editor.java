@@ -17,13 +17,11 @@
  */
 package org.apidesign.bck2brwsr.dew.javac;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
+import net.java.html.json.OnPropertyChange;
 import net.java.html.json.Property;
 
 @Model(className = "EditorModel", properties = {
@@ -39,6 +37,11 @@ public class Editor {
         @Property(name = "classifier", type = String.class),
     })
     static final class ArtifactCntrl {
+    }
+    
+    @OnPropertyChange("code")
+    static void cleanResult(EditorModel model) {
+        model.setResult("");
     }
     
     

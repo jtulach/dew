@@ -19,6 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <netbeans.compile.on.save>none</netbeans.compile.on.save>
     <project.mainclass>org.apidesign.bck2brwsr.dew.javac.Main</project.mainclass>
+    <project.mainclass.brwsr>org.apidesign.bck2brwsr.dew.javac.Editor</project.mainclass.brwsr>
     <bck2brwsr.obfuscationlevel>FULL</bck2brwsr.obfuscationlevel>
   </properties>
   <build>
@@ -144,13 +145,29 @@
         <groupId>org.apidesign.bck2brwsr</groupId>
         <artifactId>emul.zip</artifactId>
         <version>${bck2brwsr.version}</version>
-        <scope>test</scope>
+        <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apidesign.bck2brwsr</groupId>
+          <artifactId>core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>launcher.http</artifactId>
       <version>${bck2brwsr.launcher.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apidesign.bck2brwsr</groupId>
+          <artifactId>core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.ow2.asm</groupId>
+          <artifactId>asm</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
         <groupId>org.apidesign.bck2brwsr</groupId>
@@ -451,7 +468,7 @@
                           <classPathPrefix>lib</classPathPrefix>
                           <mainJavaScript>${project.build.directory}/wora-dew.js</mainJavaScript>
                           <exports>
-                              <export>${project.mainclass}</export>
+                              <export>${project.mainclass.brwsr}</export>
                           </exports>
                       </configuration>
                   </plugin>
@@ -459,9 +476,11 @@
                       <groupId>org.apache.maven.plugins</groupId>
                       <artifactId>maven-compiler-plugin</artifactId>
                       <configuration>
+                          <!--
                           <compilerArguments>
                               <bootclasspath>netbeans.ignore.jdk.bootclasspath</bootclasspath>
                           </compilerArguments>
+                          -->
                       </configuration>
                   </plugin>
                   <plugin>
