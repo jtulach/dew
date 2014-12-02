@@ -59,7 +59,6 @@
                   </archive>
               </configuration>
           </plugin>
-          <!--
           <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
@@ -74,7 +73,6 @@
                   <mainClass>${project.mainclass}</mainClass>
               </configuration>
           </plugin>      
-          -->
           <plugin>
               <artifactId>maven-assembly-plugin</artifactId>
               <version>2.4</version>
@@ -93,30 +91,6 @@
                   </execution>
               </executions>                
           </plugin>
-          <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>exec-maven-plugin</artifactId>
-              <version>1.2.1</version>
-              <executions>
-                  <execution>
-                      <id>generate-packages</id>
-                      <phase>process-classes</phase>
-                      <configuration>
-                          <executable>java</executable>
-                          <arguments>
-                              <argument>-Dskip.if.exists=true</argument>
-                              <argument>-cp</argument>
-                              <classpath />
-                              <argument>org.apidesign.bck2brwsr.dew.javac.ClassLoaderFileManager</argument>
-                              <argument>${project.build.directory}/classes/org/apidesign/bck2brwsr/dew/javac/</argument>
-                          </arguments>
-                      </configuration>
-                      <goals>
-                          <goal>exec</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>                
       </plugins>
   </build>
   <dependencies>

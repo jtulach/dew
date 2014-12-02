@@ -49,6 +49,7 @@ public class CompileTest  {
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }\n"
             + "}\n";
         Compile result = Compile.create(html, java);
+        result.addBootClassPathElement("org.apidesign.bck2brwsr", "emul", "0.11", "rt");
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);

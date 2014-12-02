@@ -17,12 +17,8 @@
  */
 package org.apidesign.bck2brwsr.dew.javac;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import javax.tools.FileObject;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
@@ -62,10 +58,12 @@ public class ClassLoaderFileManager implements JavaFileManager {
         ANNOTATION_PROCESSOR_PATH
     };
 
-    private Map<Location, Map<String,List<MemoryFileObject>>> generated;
+    private final Map<Location, Map<String,List<MemoryFileObject>>> generated;
+    private final List<CP> cp;
 
 
     ClassLoaderFileManager() {
+        cp = new ArrayList<>();
         generated = new HashMap<>();
         for (Location l : WRITE_LOCATIONS) {
             generated.put(l, new HashMap<String, List<MemoryFileObject>>());
@@ -92,7 +90,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
          *
          */
         if (location == PLATFORM_CLASS_PATH /*canRead(location)*/) {
-            final List<JavaFileObject> res = new ArrayList<JavaFileObject>();
+            final List<JavaFileObject> res = new ArrayList<>();
             for (String resource : getResources(convertFQNToResource(packageName))) {
                 final JavaFileObject jfo = new ClassLoaderJavaFileObject(resource);
                 if (kinds.contains(jfo.getKind())) {
@@ -104,7 +102,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             Map<String,List<MemoryFileObject>> folders = generated.get(location);
             List<MemoryFileObject> files = folders.get(convertFQNToResource(packageName));
             if (files != null) {
-                final List<JavaFileObject> res = new ArrayList<JavaFileObject>();
+                final List<JavaFileObject> res = new ArrayList<>();
                 for (JavaFileObject file : files) {
                     if (kinds.contains(file.getKind()) && file.getLastModified() >= 0) {
                         res.add(file);
@@ -214,93 +212,14 @@ public class ClassLoaderFileManager implements JavaFileManager {
         List<String> content = classPathContent.get(folder);
         if (content == null) {
             List<String> arr = new ArrayList<>();
+            for (CP e : this.cp) {
+                e.listResources(folder, arr);
+            }
+            content = arr;
             classPathContent.put(folder, arr);
-            InputStream in = ClassLoaderFileManager.class.getResourceAsStream("pkg." + folder.replace('/', '.'));
-            if (in != null) {
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                for (;;) {
-                    String l = r.readLine();
-                    if (l == null) {
-                        break;
-                    }
-                    arr.add(l);
-                }
-                content = arr;
-            }
         }
-        return content == null ? Collections.<String>emptyList() : content;
+        return content;
     }
-    
-    public static void main(String... args) throws Exception {
-        File dir = new File(args[0]);
-        assert dir.isDirectory() : "Should be a directory " + dir;
-        
-        Map<String,List<String>> cntent = new HashMap<>();
-        
-        final String cp = System.getProperty("java.class.path");
-        for (String entry : cp.split(File.pathSeparator)) {
-            File f = new File(entry);
-            if (f.canRead()) {
-                if (f.isFile()) {
-                    ZipFile zf = new ZipFile(f);
-                    try {
-                        Enumeration<? extends ZipEntry> entries = zf.entries();
-                        while (entries.hasMoreElements()) {
-                            ZipEntry e = entries.nextElement();
-                            if (e.isDirectory()) {
-                                continue;
-                            }
-                            final String name = e.getName();
-                            final String owner = getOwner(name);
-                            List<String> content = cntent.get(owner);
-                            if (content == null) {
-                                content = new ArrayList<>();
-                                cntent.put(owner, content);
-                            }
-                            content.add(name);
-                        }
-                    } finally {
-                        zf.close();
-                    }
-                } else if (f.isDirectory()) {
-                    addFiles(f, "", cntent);
-                }
-            }
-        }
-        
-        for (Map.Entry<String, List<String>> en : cntent.entrySet()) {
-            String pkg = en.getKey();
-            List<String> classes = en.getValue();
-            File f = new File(dir, "pkg." + pkg.replace('/', '.'));
-            System.err.println("Generating " + f);
-            FileWriter w = new FileWriter(f);
-            for (String c : classes) {
-                w.append(c).append("\n");
-            }
-            w.close();
-        }
-    }
-
-    private static void addFiles(File folder, String path, Map<String,List<String>> into) {
-        String prefix = path;
-        if (!prefix.isEmpty()) {
-            prefix = prefix + "/";  //NOI18N
-        }
-        for (File f : folder.listFiles()) {
-            String fname = prefix + f.getName();
-            if (f.isDirectory()) {
-                addFiles(f, fname, into);
-            } else {
-                List<String> content = into.get(path);
-                if (content == null) {
-                    content = new ArrayList<>();
-                    into.put(path, content);
-                }
-                content.add(fname);
-            }
-        }
-    }
-    
     private Map<String,List<String>> classPathContent;
 
     private void register(Location loc, String resource, MemoryFileObject jfo) {
@@ -385,6 +304,10 @@ public class ClassLoaderFileManager implements JavaFileManager {
         return res;
     }
 
+    final void addCp(CP element) {
+        cp.add(element);
+    }
+
     private static final class SafeClassLoader extends ClassLoader {
         private final ClassLoader delegate;
 
@@ -411,6 +334,54 @@ public class ClassLoaderFileManager implements JavaFileManager {
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             return delegate.loadClass(name);
+        }
+    }
+
+    static class CP {
+        final String artifactId;
+        final String groupId;
+        final String version;
+        final String spec;
+
+        public CP(String groupId, String artifactId, String version, String spec) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            this.version = version;
+            this.spec = spec;
+        }
+
+        final void listResources(String folder, List<String> arr) throws IOException {
+            URL m2 = new URL("file:///home/jarda/.m2/repository/");
+            
+            String relative = groupId.replace('.', '/') + "/" +
+                artifactId + "/" + version + "/" + 
+                artifactId + "-" + version;
+            if (spec != null) {
+                relative += "-" + spec;
+            }
+            relative += ".jar";
+            
+            URL artifact = new URL(m2, relative);
+            InputStream is = artifact.openStream();
+            
+            ZipInputStream zis = new ZipInputStream(is);
+            for (;;) {
+                ZipEntry ze = zis.getNextEntry();
+                if (ze == null) {
+                    break;
+                }
+                if (ze.getName().startsWith(folder)) {
+                    String rest = ze.getName().substring(folder.length());
+                    if (rest.startsWith("/")) {
+                        rest = rest.substring(1);
+                    }
+                    if (rest.isEmpty() || rest.indexOf('/') >= 0) {
+                        continue;
+                    }
+                    arr.add(rest);
+                }
+            }
+            zis.close();
         }
     }
 
