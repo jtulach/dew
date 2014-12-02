@@ -100,6 +100,9 @@
                        <exclude>.*/**</exclude>
                        <exclude>static-dew/src/main/java/sun/**</exclude>
                        <exclude>static-dew/src/main/java/org/apidesign/bck2brwsr/dew/nbjava/**</exclude>
+                       <exclude>wora-dew/src/main/java/sun/**</exclude>
+                       <exclude>wora-dew/src/main/java/org/apidesign/bck2brwsr/dew/nbjava/**</exclude>
+                       <exclude>**/nb-configuration.xml</exclude>
                        <exclude>**/js/codemirror/**</exclude>
                        <exclude>**/js/angular/**</exclude>
                        <exclude>**/css/bootstrap*</exclude>
