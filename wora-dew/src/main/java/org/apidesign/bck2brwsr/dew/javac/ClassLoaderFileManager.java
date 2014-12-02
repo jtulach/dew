@@ -91,8 +91,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
          */
         if (location == PLATFORM_CLASS_PATH /*canRead(location)*/) {
             final List<JavaFileObject> res = new ArrayList<>();
-            for (String resource : getResources(convertFQNToResource(packageName))) {
-                final JavaFileObject jfo = new ClassLoaderJavaFileObject(resource);
+            for (JavaFileObject jfo : getResources(convertFQNToResource(packageName))) {
                 if (kinds.contains(jfo.getKind())) {
                     res.add(jfo);
                 }
@@ -141,9 +140,10 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public JavaFileObject getJavaFileForInput(Location location, String className, JavaFileObject.Kind kind) throws IOException {
-        if (canRead(location)) {
-            return new ClassLoaderJavaFileObject(convertFQNToResource(className) + kind.extension);
-        } else {
+//        if (canRead(location)) {
+//            return new ClassLoaderJavaFileObject(convertFQNToResource(className) + kind.extension);
+//        } else {
+        {
             throw new UnsupportedOperationException("Unsupported location for reading java file: " + location);   //NOI18N
         }
     }
@@ -162,14 +162,15 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
-        if (canRead(location)) {
-            StringBuilder resource = new StringBuilder(convertFQNToResource(packageName));
-            if (resource.length() > 0) {
-                resource.append('/');   //NOI18N
-            }
-            resource.append(relativeName);
-            return new ClassLoaderJavaFileObject(resource.toString());
-        } else {
+//        if (canRead(location)) {
+//            StringBuilder resource = new StringBuilder(convertFQNToResource(packageName));
+//            if (resource.length() > 0) {
+//                resource.append('/');   //NOI18N
+//            }
+//            resource.append(relativeName);
+//            return new ClassLoaderJavaFileObject(resource.toString());
+//        } else {
+        {
             throw new UnsupportedOperationException("Unsupported location for reading file: " + location);   //NOI18N
         }
     }
@@ -205,13 +206,13 @@ public class ClassLoaderFileManager implements JavaFileManager {
     }
 
 
-    private List<String> getResources(String folder) throws IOException {
+    private List<JavaFileObject> getResources(String folder) throws IOException {
         if (classPathContent == null) {
             classPathContent = new HashMap<>();
         }
-        List<String> content = classPathContent.get(folder);
+        List<JavaFileObject> content = classPathContent.get(folder);
         if (content == null) {
-            List<String> arr = new ArrayList<>();
+            List<JavaFileObject> arr = new ArrayList<>();
             for (CP e : this.cp) {
                 e.listResources(folder, arr);
             }
@@ -220,7 +221,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         }
         return content;
     }
-    private Map<String,List<String>> classPathContent;
+    private Map<String,List<JavaFileObject>> classPathContent;
 
     private void register(Location loc, String resource, MemoryFileObject jfo) {
         Map<String,List<MemoryFileObject>> folders = generated.get(loc);
@@ -350,7 +351,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             this.spec = spec;
         }
 
-        final void listResources(String folder, List<String> arr) throws IOException {
+        final void listResources(String folder, List<JavaFileObject> arr) throws IOException {
             URL m2 = new URL("file:///home/jarda/.m2/repository/");
             
             String relative = groupId.replace('.', '/') + "/" +
@@ -378,7 +379,16 @@ public class ClassLoaderFileManager implements JavaFileManager {
                     if (rest.isEmpty() || rest.indexOf('/') >= 0) {
                         continue;
                     }
-                    arr.add(rest);
+                    byte[] data = new byte[(int)ze.getSize()];
+                    int offset = 0;
+                    while (offset < data.length) {
+                        int read = zis.read(data, offset, data.length - offset);
+                        if (read == -1) {
+                            break;
+                        }
+                        offset += read;
+                    }
+                    arr.add(new ClassLoaderJavaFileObject(rest, data));
                 }
             }
             zis.close();

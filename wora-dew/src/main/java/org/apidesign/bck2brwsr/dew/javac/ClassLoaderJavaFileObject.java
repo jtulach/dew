@@ -18,7 +18,7 @@
 package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,18 +32,16 @@ import java.io.Writer;
  * @author Tomas Zezula
  */
 class ClassLoaderJavaFileObject extends BaseFileObject {
+    private final byte[] data;
 
-    ClassLoaderJavaFileObject(final String path) {
+    ClassLoaderJavaFileObject(final String path, byte[] data) {
         super(path, getKind(path));
+        this.data = data;
     }    
 
     @Override
     public InputStream openInputStream() throws IOException {
-        final InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-        if (in == null) {
-            throw new FileNotFoundException(path);
-        }
-        return in;
+        return new ByteArrayInputStream(data);
     }
 
     @Override
