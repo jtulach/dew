@@ -152,16 +152,16 @@ public final class JavacEndpoint {
     }
 
     @Model(className = "JavacError", properties = {
-        @Property(name = "col", type = long.class),
-        @Property(name = "line", type = long.class),
+        @Property(name = "col", type = int.class),
+        @Property(name = "line", type = int.class),
         @Property(name = "kind", type = Diagnostic.Kind.class),
         @Property(name = "msg", type = String.class)
     })
     static final class JavacErrorModel {
         static JavacError create(Diagnostic<? extends JavaFileObject> d) {
             return new JavacError(
-                    d.getColumnNumber(),
-                    d.getLineNumber(),
+                    (int)d.getColumnNumber(),
+                    (int)d.getLineNumber(),
                     d.getKind(),
                     d.getMessage(Locale.ENGLISH)
             );
