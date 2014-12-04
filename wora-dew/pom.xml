@@ -20,7 +20,7 @@
     <netbeans.compile.on.save>none</netbeans.compile.on.save>
     <project.mainclass>org.apidesign.bck2brwsr.dew.javac.Main</project.mainclass>
     <project.mainclass.brwsr>org.apidesign.bck2brwsr.dew.javac.Editor</project.mainclass.brwsr>
-    <bck2brwsr.obfuscationlevel>FULL</bck2brwsr.obfuscationlevel>
+    <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
   </properties>
   <build>
       <plugins>
