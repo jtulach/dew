@@ -26,12 +26,12 @@
     <body>
         <h1>DEW Attempt</h1>
         
-        <div data-bind="text: result"></div>
-        <textarea cols="80" rows="25" data-bind="value: code">
-        </textarea>
         <p>
         <button data-bind="click: compile">Compile!</button>
         </p>
+        <textarea cols="40" rows="15" data-bind="value: code">
+        </textarea>
+        <div data-bind="text: result"></div>
         <!-- boot bck2brwsr -->
         <script type="text/javascript" src="bck2brwsr.js"></script>
         <script>
