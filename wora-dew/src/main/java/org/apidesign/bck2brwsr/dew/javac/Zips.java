@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +54,8 @@ final class Zips {
         
         final void listResources(String folder, List<JavaFileObject> arr) throws IOException {
             if (data == null) {
-                URL m2 = new URL("file:///home/jarda/.m2/repository/");
+                URL local = new URL("file:///home/jarda/.m2/repository/");
+                URL online = new URL("https://repo1.maven.org/maven2/");
 
                 String relative = entry.groupId.replace('.', '/') + "/"
                         + entry.artifactId + "/" + entry.version + "/"
@@ -63,20 +65,11 @@ final class Zips {
                 }
                 relative += ".jar";
 
-                URL artifact = new URL(m2, relative);
-                InputStream is = artifact.openStream();
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                for (;;) {
-                    byte[] tmp = new byte[4096 * 8];
-                    int len = is.read(tmp);
-                    if (len == -1) {
-                        break;
-                    }
-                    os.write(tmp, 0, len);
+                try {
+                    data = readURL(local, relative);
+                } catch (IOException ex) {
+                    data = readURL(online, relative);
                 }
-                data = os.toByteArray();
-                os.close();
-                is.close();
             }
 
             ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(data));
@@ -106,6 +99,21 @@ final class Zips {
                 }
             }
             zis.close();
+        }
+
+        private byte[] readURL(URL m2, String relative) throws IOException, MalformedURLException {
+            try (InputStream is = new URL(m2, relative).openStream()) {
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                for (;;) {
+                    byte[] tmp = new byte[4096 * 8];
+                    int len = is.read(tmp);
+                    if (len == -1) {
+                        break;
+                    }
+                    os.write(tmp, 0, len);
+                }
+                return os.toByteArray();
+            }
         }
         
     }
