@@ -36,8 +36,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Export-Package>com.sun.tools.javac.api,com.sun.tools.javac.parser</Export-Package>
                         <Private-Package>com.sun.tools.*</Private-Package>
-                        <Export-Package>com.sun.tools.javac.api</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
