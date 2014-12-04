@@ -35,7 +35,7 @@ public class CompileTest  {
             + "class X { "
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }"
             + "}";
-        Compile result = Compile.create(html, java);
+        Compile result = createCompile(html, java);
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
@@ -48,8 +48,7 @@ public class CompileTest  {
             + "public class X {\n"
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }\n"
             + "}\n";
-        Compile result = Compile.create(html, java);
-        result.addClassPathElement("org.apidesign.bck2brwsr", "emul", "0.11", "rt");
+        Compile result = createCompile(html, java);
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
@@ -81,7 +80,7 @@ public class CompileTest  {
             + "   public static native void call(Runnable r);"
             + "}\n";    
             
-        Compile result = Compile.create(html, java);
+        Compile result = createCompile(html, java);
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
@@ -96,7 +95,7 @@ public class CompileTest  {
             + "class X {\n"
             + "   static void main(String... args) { Y y = new Y(); }\n"
             + "}\n";
-        Compile result = Compile.create(html, java);
+        Compile result = createCompile(html, java);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);
@@ -121,7 +120,7 @@ public class CompileTest  {
             + "     y.applyBindings();\n"
             + "  }\n"
             + "}\n";
-        Compile result = Compile.create(html, java);
+        Compile result = createCompile(html, java);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);
@@ -129,6 +128,12 @@ public class CompileTest  {
         byte[] out = new byte[256];
         System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
         return Arrays.toString(out);
+    }
+    
+    private Compile createCompile(String html, String java) throws IOException {
+        Compile result = Compile.create(html, java);
+        result.addClassPathElement("org.apidesign.bck2brwsr", "emul", "0.11", "rt");
+        return result;
     }
     
     @Factory public static Object[] create() {
