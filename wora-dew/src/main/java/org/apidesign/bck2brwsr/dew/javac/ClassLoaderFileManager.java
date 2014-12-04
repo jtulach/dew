@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -36,6 +37,7 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 
 import static javax.tools.StandardLocation.*;
+import org.apidesign.bck2brwsr.dew.javac.Zips.ZipInfo;
 
 /**
  *
@@ -59,7 +61,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
     };
 
     private final Map<Location, Map<String,List<MemoryFileObject>>> generated;
-    private final List<CP> cp;
+    private final List<CPEntry> cp;
 
 
     ClassLoaderFileManager() {
@@ -213,8 +215,9 @@ public class ClassLoaderFileManager implements JavaFileManager {
         List<JavaFileObject> content = classPathContent.get(folder);
         if (content == null) {
             List<JavaFileObject> arr = new ArrayList<>();
-            for (CP e : this.cp) {
-                e.listResources(folder, arr);
+            for (CPEntry e : this.cp) {
+                ZipInfo info = Zips.find(e);
+                info.listResources(folder, arr);
             }
             content = arr;
             classPathContent.put(folder, arr);
@@ -305,7 +308,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
         return res;
     }
 
-    final void addCp(CP element) {
+    final void addCp(CPEntry element) {
         cp.add(element);
     }
 
@@ -338,60 +341,51 @@ public class ClassLoaderFileManager implements JavaFileManager {
         }
     }
 
-    static class CP {
+    static class CPEntry {
         final String artifactId;
         final String groupId;
         final String version;
         final String spec;
 
-        public CP(String groupId, String artifactId, String version, String spec) {
+        public CPEntry(String groupId, String artifactId, String version, String spec) {
             this.groupId = groupId;
             this.artifactId = artifactId;
             this.version = version;
             this.spec = spec;
         }
 
-        final void listResources(String folder, List<JavaFileObject> arr) throws IOException {
-            URL m2 = new URL("file:///home/jarda/.m2/repository/");
-            
-            String relative = groupId.replace('.', '/') + "/" +
-                artifactId + "/" + version + "/" + 
-                artifactId + "-" + version;
-            if (spec != null) {
-                relative += "-" + spec;
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 41 * hash + Objects.hashCode(this.artifactId);
+            hash = 41 * hash + Objects.hashCode(this.groupId);
+            hash = 41 * hash + Objects.hashCode(this.version);
+            hash = 41 * hash + Objects.hashCode(this.spec);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
             }
-            relative += ".jar";
-            
-            URL artifact = new URL(m2, relative);
-            InputStream is = artifact.openStream();
-            
-            ZipInputStream zis = new ZipInputStream(is);
-            for (;;) {
-                ZipEntry ze = zis.getNextEntry();
-                if (ze == null) {
-                    break;
-                }
-                if (ze.getName().startsWith(folder)) {
-                    String rest = ze.getName().substring(folder.length());
-                    if (rest.startsWith("/")) {
-                        rest = rest.substring(1);
-                    }
-                    if (rest.isEmpty() || rest.indexOf('/') >= 0) {
-                        continue;
-                    }
-                    byte[] data = new byte[(int)ze.getSize()];
-                    int offset = 0;
-                    while (offset < data.length) {
-                        int read = zis.read(data, offset, data.length - offset);
-                        if (read == -1) {
-                            break;
-                        }
-                        offset += read;
-                    }
-                    arr.add(new ClassLoaderJavaFileObject(rest, data));
-                }
+            if (getClass() != obj.getClass()) {
+                return false;
             }
-            zis.close();
+            final CPEntry other = (CPEntry) obj;
+            if (!Objects.equals(this.artifactId, other.artifactId)) {
+                return false;
+            }
+            if (!Objects.equals(this.groupId, other.groupId)) {
+                return false;
+            }
+            if (!Objects.equals(this.version, other.version)) {
+                return false;
+            }
+            if (!Objects.equals(this.spec, other.spec)) {
+                return false;
+            }
+            return true;
         }
     }
 

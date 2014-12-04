@@ -90,7 +90,7 @@ final class Compile {
     public final void addClassPathElement(
         String groupId, String artifactId, String version, String classifier
     ) {
-        clfm.addCp(new ClassLoaderFileManager.CP(groupId, artifactId, version, classifier));
+        clfm.addCp(new ClassLoaderFileManager.CPEntry(groupId, artifactId, version, classifier));
     }
 
     public List<? extends JavaCompletionItem> getCompletions(int offset) {
