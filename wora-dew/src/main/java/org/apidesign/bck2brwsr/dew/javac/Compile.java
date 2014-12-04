@@ -163,4 +163,10 @@ final class Compile {
     String getJava() {
         return info != null ? info.getText() : null;
     }
+
+    @Override
+    public String toString() {
+        return "Compile[classes=" + (classes == null ? "null" : classes.keySet().toString()) +
+            ", errors: " + (errors == null ? "null" : errors.toString()); 
+    }
 }
