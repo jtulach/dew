@@ -85,7 +85,7 @@ public abstract class BaseFileObject implements InferableJavaFileObject {
         if (slashIndex < 0) {
             name = path;
         } else {
-            assert slashIndex + 1 < path.length();
+            assert slashIndex + 1 < path.length() : "slashIndex = " + slashIndex + " path: " + path;
             name = path.substring(slashIndex + 1);
         }
         if (removeExtension) {

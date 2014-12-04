@@ -84,6 +84,7 @@ public final class JavacEndpoint {
         
         if (c == null || !java.equals(c.getJava())) {
             c = Compile.create(html, java);
+            c.addClassPathElement("org.apidesign.bck2brwsr", "emul", "0.11", "rt");
         }
         switch (query.getType()) {
             case autocomplete:

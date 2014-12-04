@@ -228,7 +228,9 @@ final class Zips {
                 int seekby = cenext+cencom;
                 int cendatalen = ZipInputStream.CENHDR + cennam + seekby;
                 cenread+=cendatalen;
-                result = addEntry(result, new Entry(name,lhoff, centim));
+                if (!name.endsWith("/")) {
+                    result = addEntry(result, new Entry(name,lhoff, centim));
+                }
                 at += seekby;
             }
             return result;
