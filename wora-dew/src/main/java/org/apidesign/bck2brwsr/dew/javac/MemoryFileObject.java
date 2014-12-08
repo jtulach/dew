@@ -26,6 +26,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.logging.Level;
+import static org.apidesign.bck2brwsr.dew.javac.ClassLoaderFileManager.LOG;
 
 /**
  *
@@ -56,6 +59,7 @@ class MemoryFileObject extends BaseFileObject {
 
     @Override
     public InputStream openInputStream() throws IOException {
+        LOG.log(Level.INFO, "openInputStream for {0} content:\n{1}", new Object[]{getName(), content()});
         if (content == null) {
             throw new IOException();
         } else {
@@ -65,6 +69,7 @@ class MemoryFileObject extends BaseFileObject {
 
     @Override
     public OutputStream openOutputStream() throws IOException {
+        LOG.log(Level.INFO, "openOutputStream for {0}", getName());
         return new CloseStream();
     }
 
@@ -75,10 +80,20 @@ class MemoryFileObject extends BaseFileObject {
 
     @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+        final CharSequence c = content();
+        LOG.log(Level.INFO, "getCharContent for {0} content:\n{1}", new Object[]{getName(), c});
+        return c;
+    }
+
+    private CharSequence content() throws IOException {
         if (content == null) {
             throw new IOException();
         } else {
-            return new String(content);
+            try {
+                return new String(content);
+            } catch (Exception ex) {
+                return Arrays.toString(content);
+            }
         }
     }
 
@@ -129,6 +144,7 @@ class MemoryFileObject extends BaseFileObject {
             delegate.close();
             content = delegate.toByteArray();
             lastModified = System.currentTimeMillis();
+            LOG.log(Level.INFO, "write done for {0} content:\n{1}", new Object[]{getName(), content()});
         }                                    
 
     }

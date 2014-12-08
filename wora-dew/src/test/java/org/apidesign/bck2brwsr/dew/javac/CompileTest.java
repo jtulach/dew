@@ -81,6 +81,7 @@ public class CompileTest  {
             + "}\n";    
             
         Compile result = createCompile(html, java);
+        result.addClassPathElement("org.netbeans.html", "net.java.html.boot", "1.0", null);
         
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
@@ -97,6 +98,7 @@ public class CompileTest  {
             + "}\n";
         Compile result = createCompile(html, java);
         result.addClassPathElement("org.netbeans.html", "net.java.html.json", "1.0", null);
+        result.addClassPathElement("org.netbeans.html", "net.java.html", "1.0", null);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);
@@ -122,6 +124,8 @@ public class CompileTest  {
             + "  }\n"
             + "}\n";
         Compile result = createCompile(html, java);
+        result.addClassPathElement("org.netbeans.html", "net.java.html.json", "1.0", null);
+        result.addClassPathElement("org.netbeans.html", "net.java.html", "1.0", null);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result);

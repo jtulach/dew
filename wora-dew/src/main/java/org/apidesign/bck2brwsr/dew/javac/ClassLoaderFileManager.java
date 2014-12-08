@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.tools.FileObject;
@@ -44,6 +46,7 @@ import org.apidesign.bck2brwsr.dew.javac.Zips.ZipInfo;
  * @author Tomas Zezula
  */
 public class ClassLoaderFileManager implements JavaFileManager {
+    static final Logger LOG = Logger.getLogger(ClassLoaderFileManager.class.getName());
 
     private static final Location[] READ_LOCATIONS = {
         PLATFORM_CLASS_PATH,
@@ -75,7 +78,9 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public ClassLoader getClassLoader(Location location) {
-        if (canClassLoad(location)) {
+        final boolean ok = canClassLoad(location);
+        LOG.log(Level.INFO, "getClassLoader for {0}. Can we? {1}", new Object[]{location, ok});
+        if (ok) {
             return new SafeClassLoader(getClass().getClassLoader());
         } else {
             return null;
@@ -84,6 +89,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
     @Override
     public Iterable<JavaFileObject> list(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse) throws IOException {
+        LOG.log(Level.INFO, "list {0} {1} kinds: {2} recurse: {3}", new Object[]{location, packageName, kinds, recurse});
         /* Correctly canRead(location) should be used. However in the dew the rsources are loaded
          * from the CLFM classloader so PLATFORM_CLASS_PATH and CLASSPATH are duplicates (javac allways
          * calls list for both PLATFORM_CLASS_PATH and CLASSPATH.
@@ -95,6 +101,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
             final List<JavaFileObject> res = new ArrayList<>();
             for (JavaFileObject jfo : getResources(convertFQNToResource(packageName))) {
                 if (kinds.contains(jfo.getKind())) {
+                    LOG.log(Level.INFO, "  found: {0}", jfo.getName());
                     res.add(jfo);
                 }
             }
@@ -106,6 +113,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
                 final List<JavaFileObject> res = new ArrayList<>();
                 for (JavaFileObject file : files) {
                     if (kinds.contains(file.getKind()) && file.getLastModified() >= 0) {
+                        LOG.log(Level.INFO, "  found: {0}", file.getName());
                         res.add(file);
                     }
                 }
@@ -227,6 +235,7 @@ public class ClassLoaderFileManager implements JavaFileManager {
     private Map<String,List<JavaFileObject>> classPathContent;
 
     private void register(Location loc, String resource, MemoryFileObject jfo) {
+        LOG.log(Level.INFO, "register {0} {1} jfo: {2}", new Object[]{loc, resource, jfo});
         Map<String,List<MemoryFileObject>> folders = generated.get(loc);
         final String folder = getOwner(resource);
         List<MemoryFileObject> content = folders.get(folder);
@@ -322,21 +331,28 @@ public class ClassLoaderFileManager implements JavaFileManager {
 
         @Override
         public URL getResource(String name) {
+            LOG.log(Level.INFO, "Loading resource {0} for the compiler", name);
             return delegate.getResource(name);
         }
 
         @Override
         public InputStream getResourceAsStream(String name) {
+            LOG.log(Level.INFO, "Loading resource {0} for the compiler", name);
             return delegate.getResourceAsStream(name);
         }
 
         @Override
-        public Enumeration<URL> getResources(String name) throws IOException {
-            return delegate.getResources(name);
+        public Enumeration<URL> getResources(final String name) throws IOException {
+            final Enumeration<URL> en = delegate.getResources(name);
+            LOG.log(Level.INFO, "Loading resources {0} for the compiler. Found any {1}", 
+                new Object[] { name, en.hasMoreElements() }
+            );
+            return en;
         }
 
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
+            LOG.log(Level.INFO, "Loading class {0} for the compiler", name);
             return delegate.loadClass(name);
         }
     }
