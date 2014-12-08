@@ -164,6 +164,13 @@
       </exclusions>
     </dependency>
     <dependency>
+        <groupId>org.apidesign.bck2brwsr</groupId>
+        <artifactId>emul.zip</artifactId>
+        <version>${bck2brwsr.version}</version>
+        <scope>provided</scope>
+        <classifier>bck2brwsr</classifier>
+    </dependency>
+    <dependency>
       <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>launcher.http</artifactId>
       <version>${bck2brwsr.launcher.version}</version>
@@ -187,9 +194,37 @@
         <scope>test</scope>
     </dependency>
     <dependency>
+        <groupId>org.apidesign.bck2brwsr</groupId>
+        <artifactId>emul</artifactId>
+        <version>${bck2brwsr.version}</version>
+        <classifier>bck2brwsr</classifier>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apidesign.bck2brwsr</groupId>
+        <artifactId>ko-bck2brwsr</artifactId>
+        <version>${bck2brwsr.version}</version>
+        <classifier>bck2brwsr</classifier>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>javacapi</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>javacapi</artifactId>
+      <version>${project.version}</version>
+      <classifier>bck2brwsr</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>javacimpl</artifactId>
+      <version>${project.version}</version>
+      <classifier>bck2brwsr</classifier>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -481,6 +516,7 @@
                           <exports>
                               <export>${project.mainclass.brwsr}</export>
                           </exports>
+                          <generateAotLibraries>false</generateAotLibraries>
                       </configuration>
                   </plugin>
                   <plugin>
@@ -520,6 +556,13 @@
                   <artifactId>emul</artifactId>
                   <version>${bck2brwsr.version}</version>
                   <classifier>rt</classifier>
+              </dependency>
+              <dependency>
+                  <groupId>org.apidesign.bck2brwsr</groupId>
+                  <artifactId>emul</artifactId>
+                  <version>${bck2brwsr.version}</version>
+                  <classifier>bck2brwsr</classifier>
+                  <scope>provided</scope>
               </dependency>
               <dependency>
                   <groupId>org.netbeans.html</groupId>
