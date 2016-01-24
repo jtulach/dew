@@ -1,7 +1,7 @@
 Development Environment for Web in Java
 =======================================
 
-This project exploits various ways of providing Java development environment for Java, but with UI written in HTML.
+This project exploits various ways of providing a development environment for Java, with its UI written in HTML.
 The focus is on client only solutions that require no server to perform the compilation at all. The most functional
 application of this technology can be found at
 
