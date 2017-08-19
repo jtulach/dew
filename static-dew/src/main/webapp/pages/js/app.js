@@ -277,7 +277,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             } else {
                 var res = parseJson(xhr.response);
                 $scope.gistid = res.id;
-                $scope.userid = res.user.login;
+                $scope.userid = res.user ? res.user.login : null;
                 $scope.url = res.html_url;
                 $scope.description = res.description;
                 for (var f in res.files) {
