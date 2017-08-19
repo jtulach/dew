@@ -11,8 +11,7 @@
       <netbeans.version>RELEASE81</netbeans.version>
       <license>COPYING</license>
       <net.java.html.version>1.4</net.java.html.version>
-      <bck2brwsr.version>0.20</bck2brwsr.version>
-      <bck2brwsr.launcher.version>0.20</bck2brwsr.launcher.version>
+      <bck2brwsr.version>1.0-SNAPSHOT</bck2brwsr.version>
       <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
   </properties>
   <modules>

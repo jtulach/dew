@@ -150,7 +150,7 @@
     <dependency>
         <groupId>org.apidesign.bck2brwsr</groupId>
         <artifactId>launcher.http</artifactId>
-        <version>${bck2brwsr.launcher.version}</version>
+        <version>${bck2brwsr.version}</version>
         <scope>test</scope>
         <exclusions>
             <exclusion>
