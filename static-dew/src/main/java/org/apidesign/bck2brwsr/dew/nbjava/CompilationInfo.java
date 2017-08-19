@@ -543,7 +543,7 @@ public final class CompilationInfo {
             if (currentPhase == Phase.RESOLVED && phase.compareTo(Phase.UP_TO_DATE)>=0) {
                 currentPhase = Phase.UP_TO_DATE;
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             parserError = currentPhase;
             throw ex;
         } finally {

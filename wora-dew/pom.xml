@@ -9,7 +9,6 @@
 
   <groupId>org.apidesign.bck2brwsr.dew</groupId>
   <artifactId>wora-dew</artifactId>
-  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>DEW Everywhere</name>
