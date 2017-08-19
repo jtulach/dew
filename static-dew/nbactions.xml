@@ -22,22 +22,24 @@
     <action>
         <actionName>run</actionName>
         <goals>
-            <goal>process-classes</goal>
-            <goal>bck2brwsr:brwsr</goal>
+            <goal>package</goal>
+            <goal>bck2brwsr:show</goal>
         </goals>
         <properties>
             <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
+            <skipTests>true</skipTests>
         </properties>
     </action>
     <action>
         <actionName>debug</actionName>
         <goals>
-            <goal>process-classes</goal>
+            <goal>package</goal>
             <goal>bck2brwsr:brwsr</goal>
         </goals>
         <properties>
             <jpda.listen>maven</jpda.listen>
             <bck2brwsr.obfuscationlevel>NONE</bck2brwsr.obfuscationlevel>
+            <skipTests>true</skipTests>
         </properties>
     </action>
 </actions>

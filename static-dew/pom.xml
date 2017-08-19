@@ -44,6 +44,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <brwsr.startpage>pages/index.html</brwsr.startpage>
     <bck2brwsr.obfuscationlevel>MINIMAL</bck2brwsr.obfuscationlevel>
+    <netbeans.compile.on.save>none</netbeans.compile.on.save>
   </properties>
   <build>
       <plugins>
