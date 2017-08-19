@@ -24,7 +24,7 @@ import net.java.html.json.Model;
 import net.java.html.json.OnPropertyChange;
 import net.java.html.json.Property;
 
-@Model(className = "EditorModel", properties = {
+@Model(className = "EditorModel", targetId="", properties = {
     @Property(name = "code", type = String.class),
     @Property(name = "result", type = String.class),
     @Property(name = "classpath", type = Artifact.class, array = true)
