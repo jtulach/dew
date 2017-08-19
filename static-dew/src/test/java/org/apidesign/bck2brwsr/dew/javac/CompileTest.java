@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.apidesign.bck2brwsr.vmtest.Compare;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
+import static org.testng.Assert.fail;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
@@ -85,7 +86,7 @@ public class CompileTest  {
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
         final byte[] bytes2 = result.get("x/y/z/$JsCallbacks$.class");
-        assertNotNull(bytes2, "Class for callbacks is compiled: " + result);
+        assertNotNull(bytes2, "Class for callbacks is compiled: " + result.getErrors());
     }
     
     @Compare public String testAnnotationProcessorCompile() throws IOException {
@@ -98,7 +99,7 @@ public class CompileTest  {
         Compile result = Compile.create(html, java);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
-        assertNotNull(bytes, "Class Y is compiled: " + result);
+        assertNotNull(bytes, "Class Y is compiled: " + result.getErrors());
         
         byte[] out = new byte[256];
         System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
@@ -108,7 +109,7 @@ public class CompileTest  {
     @Compare public String modelReferencesClass() throws IOException {
         String html = "";
         String java = "package x.y.z;"
-            + "@net.java.html.json.Model(className=\"Y\", properties={\n"
+            + "@net.java.html.json.Model(className=\"Y\", targetId=\"\", properties={\n"
             + "  @net.java.html.json.Property(name=\"x\",type=X.class, array = true)\n"
             + "})\n"
             + "class YImpl {\n"
@@ -123,6 +124,9 @@ public class CompileTest  {
         Compile result = Compile.create(html, java);
         
         final byte[] bytes = result.get("x/y/z/Y.class");
+        if (!result.getErrors().isEmpty()) {
+            fail("Unexpected errors: " + result.getErrors());
+        }
         assertNotNull(bytes, "Class Y is compiled: " + result);
         
         byte[] out = new byte[256];
