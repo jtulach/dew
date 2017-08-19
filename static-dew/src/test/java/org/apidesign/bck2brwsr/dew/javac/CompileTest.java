@@ -19,6 +19,7 @@ package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.IOException;
 import java.util.Arrays;
+import net.java.html.json.Models;
 import org.apidesign.bck2brwsr.vmtest.Compare;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import static org.testng.Assert.fail;
@@ -30,6 +31,14 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public class CompileTest  {
+    static {
+        // make sure HTML/Java processors are loaded
+        try {
+            Models.toRaw(null);
+        } catch (RuntimeException ex) {
+            // ignore
+        }
+    }
     @Compare public String testCompile() throws IOException {
         String html = "";
         String java = "package x.y.z;"
