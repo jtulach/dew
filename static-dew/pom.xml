@@ -129,6 +129,7 @@
                             <classpath />
                             <argument>org.apidesign.bck2brwsr.dew.javac.ClassLoaderFileManager</argument>
                             <argument>${project.build.directory}/classes/org/apidesign/bck2brwsr/dew/javac/</argument>
+                            <argument>${project.build.directory}/classes/</argument>
                         </arguments>
                      </configuration>
                      <goals>
@@ -144,7 +145,6 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.5.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -234,12 +234,6 @@
                   <version>${bck2brwsr.version}</version>
                   <classifier>bck2brwsr</classifier>
                   <scope>provided</scope>
-              </dependency>
-              <dependency>
-                  <groupId>org.apidesign.bck2brwsr</groupId>
-                  <artifactId>emul</artifactId>
-                  <version>${bck2brwsr.version}</version>
-                  <scope>test</scope>
               </dependency>
               <dependency>
                   <groupId>org.apidesign.bck2brwsr</groupId>

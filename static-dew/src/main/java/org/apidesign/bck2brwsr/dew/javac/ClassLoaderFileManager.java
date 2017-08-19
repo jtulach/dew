@@ -19,6 +19,7 @@ package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -234,6 +235,8 @@ public class ClassLoaderFileManager implements JavaFileManager {
     public static void main(String... args) throws Exception {
         File dir = new File(args[0]);
         assert dir.isDirectory() : "Should be a directory " + dir;
+        File root = new File(args[1]);
+        assert root.isDirectory() : "Should be a directory " + root;
         
         Map<String,List<String>> cntent = new HashMap<>();
         
@@ -258,6 +261,24 @@ public class ClassLoaderFileManager implements JavaFileManager {
                                 cntent.put(owner, content);
                             }
                             content.add(name);
+                            if (name.endsWith(".class")) {
+                                String fqnClazz = name.replace('/', File.separatorChar).substring(0, name.length() - 6) + ".clazz";
+                                File fqnFile = new File(root, fqnClazz);
+                                byte[] arr = new byte[4096];
+                                fqnFile.getParentFile().mkdirs();
+                                try (
+                                    FileOutputStream fos = new FileOutputStream(fqnFile);
+                                    InputStream is = zf.getInputStream(e);
+                                ) {
+                                    for (;;) {
+                                        int len = is.read(arr);
+                                        if (len <= 0) {
+                                            break;
+                                        }
+                                        fos.write(arr, 0, len);
+                                    }
+                                }
+                            }
                         }
                     } finally {
                         zf.close();
@@ -349,7 +370,11 @@ public class ClassLoaderFileManager implements JavaFileManager {
     }
 
     static String convertFQNToResource(String fqn) {
-        return fqn.replace('.', '/');   //NOI18N
+        String res = fqn.replace('.', '/'); //NOI18N
+        if (res.endsWith(".class")) {
+            res = res.substring(0, res.length() - 6) + ".clazz";
+        }
+        return res;
     }
 
     static String convertResourceToFQN(String resource) {
