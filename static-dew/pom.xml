@@ -64,7 +64,7 @@
                     <directory>${project.build.directory}/${project.build.finalName}-bck2brwsr/public_html/</directory>
                     <startpage>index.html</startpage>
                     <classPathPrefix>lib</classPathPrefix>
-                    <mainJavaScript>${project.build.directory}/bck2brwsr.js</mainJavaScript>
+                    <mainJavaScript>${project.build.directory}/static-dew.js</mainJavaScript>
                     <exports>
                         <export>${project.mainclass}</export>
                     </exports>
@@ -183,6 +183,12 @@
       <artifactId>net.java.html.boot</artifactId>
       <version>${net.java.html.version}</version>
       <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.html</groupId>
+      <artifactId>xhr4j</artifactId>
+      <version>${net.java.html.version}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
         <groupId>${project.groupId}</groupId>

@@ -18,10 +18,35 @@
 importScripts('bck2brwsr.js');
 
 window = {};
+document = {};
+document.createElement = function(name) {
+    var s = {};
+    s.name = name;
+    s.target = s;
+    return s;
+};
+document.getElementsByTagName = function() {
+    return [document];
+};
+document.appendChild = function(s) {
+    if (s.name === 'script') {
+        try {
+            importScripts(s.src);
+            if (typeof s.onload === 'function') {
+                s.onload(s);
+            }
+        } catch (ex) {
+            if (typeof s.onerror === 'function') {
+                s.onerror(s);
+            }
+            console.log(ex);
+        }
+    }
+};
 
 (function() {
     // init the bck2brwsr VM and compiler
-    var vm = bck2brwsr('${project.build.finalName}.jar');
+    var vm = bck2brwsr('./static-dew.js');
     vm.loadClass('org.apidesign.bck2brwsr.dew.javac.JavacEndpoint');
 })(this);
 

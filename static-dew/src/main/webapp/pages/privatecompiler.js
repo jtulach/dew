@@ -15,6 +15,17 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
-importScripts('compiler.js');
 
-initCompiler(this);
+try {
+    importScripts('compiler.js');
+} catch (ex) {
+    port.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
+}
+
+try {
+    initCompiler(this);
+} catch (ex) {
+    port.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
+}
+
+console.log("initialized.js");
