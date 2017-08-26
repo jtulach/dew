@@ -42,7 +42,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>com.sun.tools.javac.api,com.sun.tools.javac.parser</Export-Package>
+                        <Export-Package>com.sun.tools.javac.api,com.sun.tools.javac.parser,com.sun.tools.javac.tree,com.sun.tools.javac.comp,com.sun.tools.javac.model</Export-Package>
                         <Private-Package>com.sun.tools.*</Private-Package>
                     </instructions>
                     <Embed-Dependency>nb-javac-impl;scope=provided</Embed-Dependency>
