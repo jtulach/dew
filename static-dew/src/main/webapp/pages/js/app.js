@@ -201,12 +201,22 @@ function DevCtrl( $scope, $timeout, $http ) {
             var first = null;
             for (var i = 0; i < $scope.classes.length; i++) {
                 var cn = $scope.classes[i].className;
-                cn = cn.substring(0, cn.length - 6).replace__Ljava_lang_String_2CC('/','.');
+                cn = cn.substring(0, cn.length - 6).split('/').join('.');
+                var clazz;
                 try {
-                    vm.vm._reload(cn, $scope.classes[i].byteCode);
+                    clazz = vm.loadClass(cn);
+                } catch (err) {
+                    $scope.status = 'Cannot find ' + cn;
+                    clazz = null;
+                }
+                try {
+                    if (clazz !== null) {
+                        var vmApi = vm.loadClass("org.apidesign.vm4brwsr.api.VM");
+                        vmApi.reload(cn, $scope.classes[i].byteCode);
+                    }
                 } catch (err) {
                     $scope.status = 'Error loading ' + cn + ': ' + err.toString();
-                    break;
+                    continue;
                 }
                 if (first === null) {
                     first = cn;
