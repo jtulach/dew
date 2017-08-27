@@ -235,8 +235,13 @@ function DevCtrl( $scope, $timeout, $http ) {
             }   
             try {
                 if (first !== null) {
-                    vm.loadClass(first);
-                    $scope.status = 'Class ' + first + ' loaded OK.';
+                    var mainClass = vm.loadClass(first);
+                    try {
+                        mainClass.invoke('main', []);
+                        $scope.status = 'Class ' + first + 'loaded and main method invoked OK.';
+                    } catch (mainErr) {
+                        $scope.status = 'Main method of ' + first + ' failed ' + mainErr;
+                    }
                 }
             } catch (err) {
                 $scope.status = 'Error loading ' + first + ': ' + err.toString();
