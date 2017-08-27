@@ -317,7 +317,9 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $scope.classes = null;
                 $scope.errors = null;
                 var editor = document.getElementById("editorJava").codeMirror;
-                editor.clearGutter("issues");
+                if (editor) {
+                    editor.clearGutter("issues");
+                }
             }
         };
     }
@@ -421,8 +423,10 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
     $scope.applyCompletion = function(cmpltn, info) {
         var editor = document.getElementById("editorJava").codeMirror;
-        editor.replaceRange(cmpltn.text, info.from, info.to);
-        editor.focus();
+        if (editor) {
+            editor.replaceRange(cmpltn.text, info.from, info.to);
+            editor.focus();
+        }
     };
     $scope.computeCompletion = function() {
       $scope.post("autocomplete");
