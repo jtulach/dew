@@ -32,6 +32,17 @@
           <directory>src/main/webapp/pages</directory>
           <outputDirectory>/</outputDirectory>
           <filtered>true</filtered>
+          <excludes>
+              <exclude>**/*.png</exclude>
+          </excludes>
+      </fileSet>
+      <fileSet>
+          <directory>src/main/webapp/pages</directory>
+          <outputDirectory>/</outputDirectory>
+          <filtered>false</filtered>
+          <includes>
+              <include>**/*.png</include>
+          </includes>
       </fileSet>
         <fileSet>
             <directory>${project.build.directory}</directory>
