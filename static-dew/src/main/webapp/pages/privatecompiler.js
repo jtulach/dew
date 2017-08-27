@@ -19,13 +19,13 @@
 try {
     importScripts('compiler.js');
 } catch (ex) {
-    port.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
+    this.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
 }
 
 try {
     initCompiler(this);
 } catch (ex) {
-    port.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
+    this.postMessage({ "status" : "Error: " + ex, classes : [], "errors" : [] });
 }
 
 console.log("initialized.js");

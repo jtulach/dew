@@ -15,42 +15,60 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://opensource.org/licenses/GPL-2.0.
  */
-importScripts('bck2brwsr.js');
 
 window = {};
 document = {};
-document.createElement = function(name) {
-    var s = {};
-    s.name = name;
-    s.target = s;
-    return s;
-};
-document.getElementsByTagName = function() {
-    return [document];
-};
-document.appendChild = function(s) {
-    if (s.name === 'script') {
-        try {
-            importScripts(s.src);
-            if (typeof s.onload === 'function') {
-                s.onload(s);
-            }
-        } catch (ex) {
-            if (typeof s.onerror === 'function') {
-                s.onerror(s);
-            }
-            console.log(ex);
-        }
-    }
-};
 
-(function() {
-    // init the bck2brwsr VM and compiler
-    var vm = bck2brwsr('./static-dew.js');
-    vm.loadClass('org.apidesign.bck2brwsr.dew.javac.JavacEndpoint');
-})(this);
+function initBck2Brwsr(port) {
+    function log(msg) {
+        port.postMessage({ "status" : msg, classes : [], "errors" : [] });
+    }
+
+    document.createElement = function(name) {
+        var s = {};
+        s.name = name;
+        s.target = s;
+        return s;
+    };
+    document.getElementsByTagName = function() {
+        return [document];
+    };
+    document.appendChild = function(s) {
+        if (s.name === 'script') {
+            log('loading ' + s.src);
+            try {
+                importScripts(s.src);
+                if (typeof s.onload === 'function') {
+                    s.onload(s);
+                }
+            } catch (ex) {
+                if (typeof s.onerror === 'function') {
+                    s.onerror(s);
+                }
+                log(ex);
+            }
+        }
+    };
+
+    log('Loading runtime...');
+    importScripts('bck2brwsr.js');
+
+
+    log('Loading endpoint...');
+    (function() {
+        // init the bck2brwsr VM and compiler
+        var vm = bck2brwsr('./static-dew.js');
+        vm.loadClass('org.apidesign.bck2brwsr.dew.javac.JavacEndpoint');
+    })(this);
+
+    log('Initialization done');
+}
 
 function initCompiler(port) {
+    if (!window.createJavac) {
+        initBck2Brwsr(port);
+    }
+    port.postMessage({ "status" : "Creating Javac", classes : [], "errors" : [] });
     if (!window.createJavac) {
         port.postMessage({ "status" : "No Javac defined!", classes : [], "errors" : [] });
         throw 'No Javac defined!';
