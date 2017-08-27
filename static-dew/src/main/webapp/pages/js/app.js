@@ -117,7 +117,9 @@ function DevCtrl( $scope, $timeout, $http ) {
         marker.className = "issue";
         
         var info = editor.lineInfo(line);
-        editor.setGutterMarker(line, "issues", info.markers ? null : marker);
+        if (info) {
+            editor.setGutterMarker(line, "issues", info.markers ? null : marker);
+        }
         
         return marker;
     };
@@ -184,13 +186,19 @@ function DevCtrl( $scope, $timeout, $http ) {
         if (!$scope.vm) {
             // initialize the VM
             var script = window.document.getElementById("brwsrvm");
-            script.src = "bck2brwsr.js";
+            script.src = "vm.js";
             if (!window.bck2brwsr) {
                 $scope.result('<h3>Initializing the Virtual Machine</h3> Please wait...');
                 $timeout($scope.run, 100);
                 return;
             }
-            $scope.vm = window.bck2brwsr($scope.loadResourceFromClasses);
+            $scope.vm = window.bck2brwsr(
+                'lib/emul-1.0-SNAPSHOT-rt.js',
+                'lib/net.java.html-1.4.js',
+                'lib/net.java.html.boot-1.4.js',
+                'lib/net.java.html.json-1.4.js',
+                $scope.loadResourceFromClasses
+            );
         }
         var vm = $scope.vm;
         
@@ -205,6 +213,9 @@ function DevCtrl( $scope, $timeout, $http ) {
                 var clazz;
                 try {
                     clazz = vm.loadClass(cn);
+                    if (!clazz.$instOf_java_lang_Class) {
+                        clazz = clazz.getClass__Ljava_lang_Class_2();
+                    }
                 } catch (err) {
                     $scope.status = 'Cannot find ' + cn;
                     clazz = null;
@@ -212,7 +223,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 try {
                     if (clazz !== null) {
                         var vmApi = vm.loadClass("org.apidesign.vm4brwsr.api.VM");
-                        vmApi.reload(cn, $scope.classes[i].byteCode);
+                        vmApi.invoke('reload', clazz, $scope.classes[i].byteCode);
                     }
                 } catch (err) {
                     $scope.status = 'Error loading ' + cn + ': ' + err.toString();

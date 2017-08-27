@@ -54,9 +54,21 @@
                 <version>${bck2brwsr.version}</version>
                 <executions>
                     <execution>
+                        <id>compiler</id>
                         <goals>
                             <goal>aot</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>vm</id>
+                        <goals>
+                            <goal>j2js</goal>
+                        </goals>
+                        <configuration>
+                            <javascript>${project.build.directory}/vm.js</javascript>
+                            <!-- anything that is almost empty -->
+                            <classes>${basedir}/src/main/assembly</classes>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
