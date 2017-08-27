@@ -190,7 +190,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 $timeout($scope.run, 100);
                 return;
             }
-            $scope.vm = window.bck2brwsr('${project.build.finalName}.jar', $scope.loadResourceFromClasses);
+            $scope.vm = window.bck2brwsr($scope.loadResourceFromClasses);
         }
         var vm = $scope.vm;
         
