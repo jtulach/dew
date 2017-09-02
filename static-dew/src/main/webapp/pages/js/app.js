@@ -209,7 +209,8 @@ function DevCtrl( $scope, $timeout, $http ) {
             var first = null;
             for (var i = 0; i < $scope.classes.length; i++) {
                 var cn = $scope.classes[i].className;
-                cn = cn.substring(0, cn.length - 6).split('/').join('.');
+                var vmName = cn.substring(0, cn.length - 6);
+                cn = vmName.split('/').join('.');
                 var clazz;
                 try {
                     clazz = vm.loadClass(cn);
@@ -221,7 +222,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                     clazz = null;
                 }
                 try {
-                    if (clazz !== null) {
+                    if (clazz !== null && clazz.jvmName === vmName) {
                         var vmApi = vm.loadClass("org.apidesign.vm4brwsr.api.VM");
                         vmApi.invoke('reload', clazz, $scope.classes[i].byteCode);
                     }
