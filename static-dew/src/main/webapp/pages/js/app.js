@@ -287,6 +287,37 @@ function DevCtrl( $scope, $timeout, $http ) {
         window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/save.html&state=" + $scope.gistid);
     };
     
+    function fixJava(t) {
+        function fixModel(text) {
+            var model = text.indexOf("@Model(");
+            if (model < 0) {
+                return text;
+            }
+            var targetId = text.indexOf("targetId");
+            if (targetId >= 0) {
+                return text;
+            }
+            return text.substring(0, model) +
+                "@Model(targetId=\"\", " +
+                text.substring(model + 7);
+        }
+        
+        function fixMain(text) {
+            if (text.match(/void *main/g)) {
+                return text;
+            }
+            var static = text.indexOf("static {");
+            if (static < 0) {
+                return text;
+            }
+            return text.substring(0, static) + 
+                "public static void main(String... args) {" +
+                text.substring(static + 8);
+        }
+        
+        return fixMain(fixModel(t));
+    }
+    
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
         $scope.html = "<h1>Loading gist..." + $scope.gistid + "</h1>";
@@ -313,7 +344,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                         $scope.origHtml = $scope.html = res.files[f].content;
                     }
                     if (f.search(/\.java$/g) >= 0) {
-                        $scope.origJava = $scope.java = res.files[f].content;
+                        $scope.origJava = $scope.java = fixJava(res.files[f].content);
                     }
                 }
                 $scope.classes = null;
