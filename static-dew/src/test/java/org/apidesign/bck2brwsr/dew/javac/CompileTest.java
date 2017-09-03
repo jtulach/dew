@@ -19,10 +19,10 @@ package org.apidesign.bck2brwsr.dew.javac;
 
 import java.io.IOException;
 import java.util.Arrays;
+import net.java.html.js.JavaScriptBody;
 import net.java.html.json.Models;
 import org.apidesign.bck2brwsr.vmtest.Compare;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
-import static org.testng.Assert.fail;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
@@ -82,6 +82,9 @@ public class CompileTest  {
     }
 
     @Compare public void canGenerateCallback() throws IOException {
+        Class<?> c = JavaScriptBody.class;
+        assertTrue(c.isAnnotation(), "JavaScriptBody is annotation class");
+        
         String html = "";
         String java = "package x.y.z;\n"
             + "import net.java.html.js.JavaScriptBody;\n"
@@ -156,5 +159,15 @@ public class CompileTest  {
             return;
         }
         assert real != null && real.equals(exp) : msg + ". Expected: " + exp + " but was: " + real;
+    }
+
+    static void fail(String text) {
+        throw new AssertionError(text);
+    }
+
+    static void assertTrue(boolean check, String msg) {
+        if (!check) {
+            fail(msg);
+        }
     }
 }
