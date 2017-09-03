@@ -17,7 +17,6 @@
   <modules>
     <module>dynamic-dew</module>
     <module>static-dew</module>
-    <module>wora-dew</module>
     <module>javacapi</module>
     <module>javacimpl</module>
   </modules>
