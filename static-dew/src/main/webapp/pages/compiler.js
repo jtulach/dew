@@ -28,6 +28,9 @@ function initBck2Brwsr(port) {
         var s = {};
         s.name = name;
         s.target = s;
+        s.getElementsByTagName = function() {
+            return [];
+        }
         return s;
     };
     document.getElementsByTagName = function() {

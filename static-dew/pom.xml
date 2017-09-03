@@ -198,7 +198,7 @@
     </dependency>
     <dependency>
       <groupId>org.netbeans.html</groupId>
-      <artifactId>xhr4j</artifactId>
+      <artifactId>ko4j</artifactId>
       <version>${net.java.html.version}</version>
       <scope>runtime</scope>
     </dependency>

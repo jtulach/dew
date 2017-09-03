@@ -197,6 +197,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 'lib/net.java.html-1.4.js',
                 'lib/net.java.html.boot-1.4.js',
                 'lib/net.java.html.json-1.4.js',
+                'lib/ko4j-1.4.js',
                 $scope.loadResourceFromClasses
             );
         }
