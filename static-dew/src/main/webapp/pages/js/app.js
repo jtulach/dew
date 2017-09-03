@@ -353,6 +353,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 if (editor) {
                     editor.clearGutter("issues");
                 }
+                editor.refresh();
             }
         };
     }
