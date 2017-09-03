@@ -84,6 +84,7 @@ function initCompiler(port) {
             port.postMessage(res);
         } catch (err) {
             port.postMessage({ "status" : "Error running compiler: " + err, classes : [], "errors" : [] });
+            console.warn(err);
         }
     };
 }
