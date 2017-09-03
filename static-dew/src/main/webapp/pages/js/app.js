@@ -193,7 +193,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 return;
             }
             $scope.vm = window.bck2brwsr(
-                'lib/emul-1.0-SNAPSHOT-rt.js',
+                'lib/emul-0.21-rt.js',
                 'lib/net.java.html-1.4.js',
                 'lib/net.java.html.boot-1.4.js',
                 'lib/net.java.html.json-1.4.js',
