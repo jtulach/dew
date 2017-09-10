@@ -46,12 +46,114 @@ public class CompileTest  {
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }"
             + "}";
         Compile result = Compile.create(html, java);
-        
+
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
         return Arrays.toString(bytes);
     }
-    
+
+    @Test
+    public void checkMainClassForHistogramIsFound() throws Exception {
+        testMainClassForHistogram();
+    }
+
+    @Test
+    public void checkMainClassForHistogramIsFound2() throws Exception {
+        testMainClassForHistogram2();
+    }
+
+    @Test
+    public void checkMainClassForHistogramIsFound3() throws Exception {
+        testMainClassForHistogram3();
+    }
+
+    @Compare public boolean testMainClassForHistogram() throws IOException {
+        String html = "";
+        String java = "\n" +
+"package dew.demo.histogram;\n" +
+"import java.util.ArrayList;\n" +
+"import java.util.List;\n" +
+"import net.java.html.json.ComputedProperty;\n" +
+"import net.java.html.json.Model;\n" +
+"import net.java.html.json.Property;\n" +
+"\n" +
+"/** Model annotation generates class Data with \n" +
+" * one property for list of of numbers and read-only property\n" +
+" * for ten of bars.\n" +
+" */\n" +
+"@Model(targetId=\"\", className = \"Histogram\", properties = {\n" +
+"    @Property(name = \"numbers\", type = String.class)\n" +
+"})\n" +
+"final class HistoModel {\n" +
+"    // initialization\n" +
+"    public static void main(String... args) {\n" +
+"    }\n" +
+"}";
+        Compile result = Compile.create(html, java);
+
+        boolean histoModelIsMain = result.isMainClass("dew/demo/histogram/HistoModel.class");
+        if (!histoModelIsMain) {
+            throw new IllegalStateException("HistoModel is the main class!");
+        }
+        return histoModelIsMain;
+    }
+
+    @Compare public boolean testMainClassForHistogram2() throws IOException {
+        String html = "";
+        String java = "\n" +
+"package dew.demo.histogram;\n" +
+"import java.util.ArrayList;\n" +
+"import java.util.List;\n" +
+"import net.java.html.json.ComputedProperty;\n" +
+"import net.java.html.json.Model;\n" +
+"import net.java.html.json.Property;\n" +
+"\n" +
+"     // Model annotation generates class Data with \n" +
+"@Model(targetId=\"\", className = \"Histogram\", properties = {\n" +
+"    @Property(name = \"numbers\", type = String.class)\n" +
+"})\n" +
+"final class HistoModel {\n" +
+"    // initialization\n" +
+"    public static void main(String... args) {\n" +
+"    }\n" +
+"}";
+        Compile result = Compile.create(html, java);
+
+        boolean histoModelIsMain = result.isMainClass("dew/demo/histogram/HistoModel.class");
+        if (!histoModelIsMain) {
+            throw new IllegalStateException("HistoModel is the main class!");
+        }
+        return histoModelIsMain;
+    }
+
+    @Compare public boolean testMainClassForHistogram3() throws IOException {
+        String html = "";
+        String java = "\n" +
+"package dew.demo.histogram;\n" +
+"import java.util.ArrayList;\n" +
+"import java.util.List;\n" +
+"import net.java.html.json.ComputedProperty;\n" +
+"import net.java.html.json.Model;\n" +
+"import net.java.html.json.Property;\n" +
+"\n" +
+"    /* Model annotation generates class Data with */ \n" +
+"@Model(targetId=\"\", className = \"Histogram\", properties = {\n" +
+"    @Property(name = \"numbers\", type = String.class)\n" +
+"})\n" +
+"final class HistoModel {\n" +
+"    // initialization\n" +
+"    public static void main(String... args) {\n" +
+"    }\n" +
+"}";
+        Compile result = Compile.create(html, java);
+
+        boolean histoModelIsMain = result.isMainClass("dew/demo/histogram/HistoModel.class");
+        if (!histoModelIsMain) {
+            throw new IllegalStateException("HistoModel is the main class!");
+        }
+        return histoModelIsMain;
+    }
+
     @Test public void canCompilePublicClass() throws IOException {
         String html = "";
         String java = "package x.y.z;"
@@ -59,11 +161,11 @@ public class CompileTest  {
             + "   static void main(String... args) { throw new RuntimeException(\"Hello brwsr!\"); }\n"
             + "}\n";
         Compile result = Compile.create(html, java);
-        
+
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
     }
-    
+
     @Test public void mainClassIsFirst() throws IOException {
         String html = "";
         String java = "package x.y.z;"
@@ -84,23 +186,23 @@ public class CompileTest  {
     @Compare public void canGenerateCallback() throws IOException {
         Class<?> c = JavaScriptBody.class;
         assertTrue(c.isAnnotation(), "JavaScriptBody is annotation class");
-        
+
         String html = "";
         String java = "package x.y.z;\n"
             + "import net.java.html.js.JavaScriptBody;\n"
             + "public class X {\n"
             + "   @JavaScriptBody(args = \"r\", javacall = true, body = \"r.@java.lang.Runnable::run()()\")\n"
             + "   public static native void call(Runnable r);"
-            + "}\n";    
-            
+            + "}\n";
+
         Compile result = Compile.create(html, java);
-        
+
         final byte[] bytes = result.get("x/y/z/X.class");
         assertNotNull(bytes, "Class X is compiled: " + result);
         final byte[] bytes2 = result.get("x/y/z/$JsCallbacks$.class");
         assertNotNull(bytes2, "Class for callbacks is compiled: " + result.getErrors());
     }
-    
+
     @Compare public String testAnnotationProcessorCompile() throws IOException {
         String html = "";
         String java = "package x.y.z;"
@@ -109,15 +211,15 @@ public class CompileTest  {
             + "   static void main(String... args) { Y y = new Y(); }\n"
             + "}\n";
         Compile result = Compile.create(html, java);
-        
+
         final byte[] bytes = result.get("x/y/z/Y.class");
         assertNotNull(bytes, "Class Y is compiled: " + result.getErrors());
-        
+
         byte[] out = new byte[256];
         System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
         return Arrays.toString(out);
     }
-    
+
     @Compare public String modelReferencesClass() throws IOException {
         String html = "";
         String java = "package x.y.z;"
@@ -134,22 +236,22 @@ public class CompileTest  {
             + "  }\n"
             + "}\n";
         Compile result = Compile.create(html, java);
-        
+
         final byte[] bytes = result.get("x/y/z/Y.class");
         if (!result.getErrors().isEmpty()) {
             fail("Unexpected errors: " + result.getErrors());
         }
         assertNotNull(bytes, "Class Y is compiled: " + result);
-        
+
         byte[] out = new byte[256];
         System.arraycopy(bytes, 0, out, 0, Math.min(out.length, bytes.length));
         return Arrays.toString(out);
     }
-    
+
     @Factory public static Object[] create() {
         return VMTest.create(CompileTest.class);
     }
-    
+
     static void assertNotNull(Object obj, String msg) {
         assert obj != null : msg;
     }

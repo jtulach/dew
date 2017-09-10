@@ -48,14 +48,14 @@ final class Compile {
     private final CompilationInfo info;
     private Map<String, byte[]> classes = null;
     private List<Diagnostic<? extends JavaFileObject>> errors;
-    
+
     private Compile(String html, String code) throws IOException {
         this.pkg = find("package", ';', code);
         this.cls = find("class ", ' ', code);
-        this.html = html;        
+        this.html = html;
         this.clfm = new ClassLoaderFileManager();
-        
-        final JavaFileObject file = clfm.createMemoryFileObject(                
+
+        final JavaFileObject file = clfm.createMemoryFileObject(
                 ClassLoaderFileManager.convertFQNToResource(pkg.isEmpty() ? cls : pkg + "." + cls) + Kind.SOURCE.extension,
                 Kind.SOURCE,
                 code.getBytes());
@@ -64,14 +64,14 @@ final class Compile {
             Kind.OTHER,
             html.getBytes());
 
-        JavaFileManager jfm = new ForwardingJavaFileManager<JavaFileManager>(clfm) {            
+        JavaFileManager jfm = new ForwardingJavaFileManager<JavaFileManager>(clfm) {
             @Override
             public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
                 if (location == StandardLocation.SOURCE_PATH) {
                     if (packageName.equals(pkg)) {
                         return htmlFile;
                     }
-                }                
+                }
                 return null;
             }
         };
@@ -132,16 +132,41 @@ final class Compile {
     }
 
     private static String find(String pref, char term, String java) throws IOException {
-        int pkg = java.indexOf(pref);
-        if (pkg != -1) {
-            pkg += pref.length();
-            while (Character.isWhitespace(java.charAt(pkg))) {
-                pkg++;
+        boolean inComment = false;
+        String[] lines = java.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.startsWith("//")) {
+                continue;
             }
-            int semicolon = java.indexOf(term, pkg);
-            if (semicolon != -1) {
-                String pkgName = java.substring(pkg, semicolon).trim();
-                return pkgName;
+            if (inComment) {
+                int end = line.indexOf("*/");
+                if (end < 0) {
+                    continue;
+                }
+                line = line.substring(end + 2);
+                inComment = false;
+            }
+
+            int pkg = line.indexOf(pref);
+
+            int begin = line.indexOf("/*");
+            if (begin >= 0 && (pkg == -1 || pkg > begin)) {
+                inComment = true;
+                lines[i--] = line.substring(begin + 2);
+                continue;
+            }
+
+            if (pkg != -1) {
+                pkg += pref.length();
+                while (Character.isWhitespace(line.charAt(pkg))) {
+                    pkg++;
+                }
+                int semicolon = line.indexOf(term, pkg);
+                if (semicolon != -1) {
+                    String pkgName = line.substring(pkg, semicolon).trim();
+                    return pkgName;
+                }
             }
         }
         throw new IOException("Can't find " + pref + " declaration in the java file");
