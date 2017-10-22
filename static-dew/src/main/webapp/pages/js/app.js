@@ -36,14 +36,14 @@ angular.module('bck2brwsr', []).
                 options = /* uiConfig.codemirror  || */ {};
                 opts = angular.extend({}, options, scope.$eval(attrs.uiCodemirror));
 
-                onChange = function(instance, changeObj) {                    
+                onChange = function(instance, changeObj) {
                     val = instance.getValue();
                     $timeout.cancel(timeoutId);
                     timeoutId = $timeout(function() {
-                        ngModel.$setViewValue(val);                        
-                      }, 500);                    
+                        ngModel.$setViewValue(val);
+                      }, 500);
                 };
-                
+
                 deferCodeMirror = function() {
                     codeMirror = CodeMirror.fromTextArea(elm[0], opts);
                     elm[0].codeMirror = codeMirror;
@@ -56,9 +56,9 @@ angular.module('bck2brwsr', []).
                             continue;
                         if (typeof aEvent !== "function")
                             continue;
-                                                
+
                         var bound = _.bind( aEvent, scope );
-                        
+
                         codeMirror.on(events[i], bound);
                     }
 
@@ -89,9 +89,9 @@ angular.module('bck2brwsr', []).
 }]);
 
 function DevCtrl( $scope, $timeout, $http ) {
-    var templateHtml = 
+    var templateHtml =
 "<h1>Please select a sample...</h1>\n";
-    var templateJava = 
+    var templateJava =
 "package waiting4javac;\n" +
 "class ToInitialize {\n" +
 "  /*int*/ myFirstError;\n" +
@@ -115,16 +115,16 @@ function DevCtrl( $scope, $timeout, $http ) {
         var marker = document.createElement("div");
         marker.innerHTML = " ";
         marker.className = "issue";
-        
+
         var info = editor.lineInfo(line);
         if (info) {
             editor.setGutterMarker(line, "issues", info.markers ? null : marker);
         }
-        
+
         return marker;
     };
-    
-    
+
+
     // Returns a function, that, as long as it continues to be invoked, will not
     // be triggered. The function will be called after it stops being called for
     // N milliseconds. If `immediate` is passed, trigger the function on the
@@ -144,22 +144,22 @@ function DevCtrl( $scope, $timeout, $http ) {
         return result;
       };
     };
-    
+
     $scope.fail = function( data ) {
         $scope.errors = eval( data );
-        var editor = document.getElementById("editorJava").codeMirror;   
+        var editor = document.getElementById("editorJava").codeMirror;
         editor.clearGutter( "issues" );
-        
+
         for( var i = 0; i < $scope.errors.length; i ++ ) {
             $scope.makeMarker( editor, $scope.errors[i].line - 1 );
         }
-        
+
     };
-    
+
     $scope.compile = function() {
-        $scope.post('compile');        
+        $scope.post('compile');
     }
-    
+
     $scope.run = function() {
         var classes = $scope.classes;
         if (classes === null) {
@@ -168,7 +168,7 @@ function DevCtrl( $scope, $timeout, $http ) {
             $scope.runWithClasses();
         }
     };
-    
+
     $scope.loadResourceFromClasses = function(resource) {
         resource = resource.toString(); // from java.lang.String to JS string
         if ($scope.classes) {
@@ -181,14 +181,14 @@ function DevCtrl( $scope, $timeout, $http ) {
         }
         return null;
     };
-    
+
     $scope.runWithClasses = function() {
         if (!$scope.vm) {
             // initialize the VM
             var script = window.document.getElementById("brwsrvm");
             script.src = "vm.js";
             if (!window.bck2brwsr) {
-                $scope.result('<h3>Initializing the Virtual Machine</h3> Please wait...');
+                $scope.result('<h3>Loading the Virtual Machine</h3> Please wait...');
                 $timeout($scope.run, 100);
                 return;
             }
@@ -200,9 +200,35 @@ function DevCtrl( $scope, $timeout, $http ) {
                 'lib/ko4j-1.4.js',
                 $scope.loadResourceFromClasses
             );
+
+            // make sure well known API classes are initialized
+            $scope.vmReady = 4;
+            $scope.vm.loadClass("java.util.Collections", function() {
+                $scope.vmReady--;
+            });
+            $scope.vm.loadClass("org.netbeans.html.json.spi.Proto$Type", function() {
+                $scope.vmReady--;
+            });
+            $scope.vm.loadClass("org.netbeans.html.boot.spi.Fn", function () {
+                $scope.vmReady--;
+            });
+            $scope.vm.loadClass("net.java.html.BrwsrCtx", function () {
+                $scope.vmReady--;
+            });
+            $timeout(function() {
+                if ($scope.vmReady !== 0) {
+                    console.warn("VM may not be properly initialized. Cleaning: " + $scope.vmReady);
+                    $scope.vmReady = 0;
+                }
+            }, 1000);
+        }
+        if ($scope.vmReady !== 0) {
+            $scope.result('<h3>Booting the Virtual Machine</h3> Please wait...');
+            $timeout($scope.run, 100);
+            return;
         }
         var vm = $scope.vm;
-        
+
         $scope.result("");
         $timeout(function() {
             $scope.result($scope.html);
@@ -234,7 +260,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 if (first === null) {
                     first = cn;
                 }
-            }   
+            }
             try {
                 if (first !== null) {
                     var mainClass = vm.loadClass(first);
@@ -250,26 +276,26 @@ function DevCtrl( $scope, $timeout, $http ) {
             }
         }, 100);
     };
-    
+
     $scope.errorClass = function( kind ) {
         switch( kind ) {
             case "ERROR" :
                 return "error";
-            default :         
-                return "warning";   
+            default :
+                return "warning";
         }
     };
-    
+
     $scope.gotoError = function( line, col ) {
-        var editor = document.getElementById("editorJava").codeMirror;   
+        var editor = document.getElementById("editorJava").codeMirror;
         editor.setCursor({ line: line - 1, ch : col - 1 });
         editor.focus();
     };
-    
+
     $scope.someErrors = function() {
         return $scope.errors !== null;
     };
-    
+
     $scope.noModification = function() {
         if (!$scope.gistid) return true;
         if (!$scope.origJava) return true;
@@ -286,7 +312,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         localStorage.gistid = $scope.gistid;
         window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/save.html&state=" + $scope.gistid);
     };
-    
+
     function fixJava(t) {
         function fixModel(text) {
             var model = text.indexOf("@Model(");
@@ -301,7 +327,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 "@Model(targetId=\"\", " +
                 text.substring(model + 7);
         }
-        
+
         function fixMain(text) {
             if (text.match(/void *main/g)) {
                 return text;
@@ -310,14 +336,14 @@ function DevCtrl( $scope, $timeout, $http ) {
             if (static < 0) {
                 return text;
             }
-            return text.substring(0, static) + 
+            return text.substring(0, static) +
                 "public static void main(String... args) {" +
                 text.substring(static + 8);
         }
-        
+
         return fixMain(fixModel(t));
     }
-    
+
     $scope.loadGist = function() {
         window.location.hash = "#" + $scope.gistid;
         $scope.html = "<h1>Loading gist..." + $scope.gistid + "</h1>";
@@ -363,10 +389,10 @@ function DevCtrl( $scope, $timeout, $http ) {
         e.innerHTML = html;
     };
 
-    
+
     $scope.url = "http://dew.apidesign.org";
     $scope.description = "Development Environment for Web";
-    
+
     {
         var samples;
         var gist = window.location.hash;
@@ -423,8 +449,8 @@ function DevCtrl( $scope, $timeout, $http ) {
     }
 
     if (!$scope.html) {
-        $scope.html= templateHtml;  
-        $scope.java = templateJava;  
+        $scope.html= templateHtml;
+        $scope.java = templateJava;
     }
     $scope.classes = null;
     $scope.status = 'Initializing compiler...';
@@ -432,7 +458,7 @@ function DevCtrl( $scope, $timeout, $http ) {
     $scope.littleCompletions = function() {
         return $scope.completions === null || $scope.completions.list === null || $scope.completions.list.length < 10;
     };
-            
+
     if (typeof SharedWorker === 'undefined') {
       var w = new Worker('privatecompiler.js', 'javac');
       $scope.javac = w;
@@ -489,7 +515,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                     from = $scope.pendingJavaHintInfo.from;
                     to = $scope.pendingJavaHintInfo.to;
                     $scope.pendingJavaHintInfo.callback({list: list, from: from, to: to, more: null});
-                } 
+                }
                 var showHint = list.length <= 10 ? null : function() {
                     CodeMirror.showHint(editor, null, {async: true});
                 }
@@ -533,7 +559,7 @@ function DevCtrl( $scope, $timeout, $http ) {
                 editor.on("cursorActivity", $scope.computeCompletion);
                 $scope.computeCompletion = null;
             }
-            var off = editor.indexFromPos(t === 'autocomplete' && $scope.pendingJavaHintInfo ? 
+            var off = editor.indexFromPos(t === 'autocomplete' && $scope.pendingJavaHintInfo ?
                 $scope.pendingJavaHintInfo.from : editor.getCursor()
             );
             $scope.javac.postMessage({ type : t, html : $scope.html, java : $scope.java, offset : off});
