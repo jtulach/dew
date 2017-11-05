@@ -73,3 +73,10 @@
     background-color: gray;
 }
 
+.navbar-inner form {
+    margin-right: 20px;
+}
+
+.navbar-inner .brand {
+    margin-left: 0px;
+}
