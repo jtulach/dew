@@ -32,34 +32,28 @@
     </head>
     <body>
                 
-        <div class="navbar navbar-fixed-top" style="width: 100%"> 
-        <div class="navbar-inner" style="padding-left: 12px; padding-right: 12px;">
-            <a class="brand" style="font-size: 100%" href="http://dew.apidesign.org/" target="_blank">
-                DEW 4 Java in a Brwsr
+        <div class="navbar navbar-fixed-top"> 
+        <div class="navbar-inner" >
+            <a class="brand" href="http://dew.apidesign.org/" target="_blank">
+                DEW
             </a>
-            <span class="text-info"><b ng-bind="description">Loading gist ...</b>
-            </span>
-            (<a class="text-info" ng-href="{{url}}" ng-bind="gistid" target="_blank"></a>)
+            <ul class="nav navbar-nav ">
+                <li class="active">
+                    <span class="brand"><b ng-bind="description">Loading gist ...</b>
+                        (edit as gist <a class="text-info" ng-href="{{url}}" ng-bind="gistid" target="_blank"></a>)
+                    </span>
+                </li>
+            </ul>
             <form class="navbar-form pull-right">
-                <!-- select class="span2"></select -->
+                <select class="btn" ng-change="loadGist()" 
+                        ng-model="gistid" 
+                        ng-options="s.id as s.description + '(' + s.id + ')' for s in samples" 
+                        ng-required 
+                >
+                </select>
                 <button ng-click="save()" ng-disabled="noModification()" class="btn btn-warning">Save</button>
                 <button ng-click="run()" ng-disabled="someErrors()" class="btn btn-warning">Run</button>
             </form>
-            <ul class="nav">                          
-                <li>
-                    <select class="btn-small" ng-change="loadGist()" 
-                            ng-model="gistid" 
-                            ng-options="s.id as s.id + ': ' + s.description for s in samples" 
-                            ng-required >
-                    </select>
-                </li>
-            </ul>
-            <!-- form class="form form-horizontal pull-right">
-                <button class="btn btn-warning btn-small pull-right top" ng-click="post()">Rebuild</button>
-            </form -->
-            <!-- ul class="nav pull-right">
-                
-            </ul-->     
         </div>  
         </div>
 
