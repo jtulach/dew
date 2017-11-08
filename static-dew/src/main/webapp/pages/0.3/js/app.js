@@ -194,10 +194,10 @@ function DevCtrl( $scope, $timeout, $http ) {
             }
             $scope.vm = window.bck2brwsr(
                 '0.3/vm/lib/emul-0.21-rt.js',
-                '0.3/vm/lib/net.java.html-1.4.js',
-                '0.3/vm/lib/net.java.html.boot-1.4.js',
-                '0.3/vm/lib/net.java.html.json-1.4.js',
-                '0.3/vm/lib/ko4j-1.4.js',
+                '0.3/vm/lib/net.java.html-1.5.js',
+                '0.3/vm/lib/net.java.html.boot-1.5.js',
+                '0.3/vm/lib/net.java.html.json-1.5.js',
+                '0.3/vm/lib/ko4j-1.5.js',
                 $scope.loadResourceFromClasses
             );
 
