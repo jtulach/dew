@@ -54,13 +54,13 @@ function initBck2Brwsr(port) {
     };
 
     log('Loading runtime...');
-    importScripts('bck2brwsr.js');
+    importScripts('vm/bck2brwsr.js');
 
 
     log('Loading endpoint...');
     (function() {
         // init the bck2brwsr VM and compiler
-        var vm = bck2brwsr('./static-dew.js');
+        var vm = bck2brwsr('vm/static-dew.js');
         vm.loadClass('org.apidesign.bck2brwsr.dew.javac.JavacEndpoint');
     })(this);
 

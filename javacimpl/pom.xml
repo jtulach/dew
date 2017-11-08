@@ -4,12 +4,12 @@
     <parent>
     <artifactId>pom</artifactId>
     <groupId>org.apidesign.bck2brwsr.dew</groupId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.3</version>
   </parent>
 
     <groupId>org.apidesign.bck2brwsr.dew</groupId>
     <artifactId>javacimpl</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.3</version>
     <packaging>bundle</packaging>
 
     <name>javacimpl OSGi Bundle</name>

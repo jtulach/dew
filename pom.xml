@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apidesign.bck2brwsr.dew</groupId>
   <artifactId>pom</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.3</version>
   <packaging>pom</packaging>
   <name>Development Environment for Web</name>
   <properties>

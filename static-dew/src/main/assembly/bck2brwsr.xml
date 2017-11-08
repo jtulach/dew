@@ -46,7 +46,7 @@
       </fileSet>
         <fileSet>
             <directory>${project.build.directory}</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>0.3/vm</outputDirectory>
             <includes>
                 <include>*.js</include>
                 <include>lib/*.js</include>

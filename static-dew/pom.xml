@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.apidesign.bck2brwsr.dew</groupId>
     <artifactId>pom</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.3</version>
   </parent>
 
   <groupId>org.apidesign.bck2brwsr.dew</groupId>
@@ -65,7 +65,7 @@
                             <goal>j2js</goal>
                         </goals>
                         <configuration>
-                            <javascript>${project.build.directory}/vm.js</javascript>
+                            <javascript>${project.build.directory}/launcher.js</javascript>
                             <!-- anything that is almost empty -->
                             <classes>${basedir}/src/main/assembly</classes>
                         </configuration>

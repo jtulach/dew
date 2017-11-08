@@ -186,18 +186,18 @@ function DevCtrl( $scope, $timeout, $http ) {
         if (!$scope.vm) {
             // initialize the VM
             var script = window.document.getElementById("brwsrvm");
-            script.src = "vm.js";
+            script.src = "0.3/vm/launcher.js";
             if (!window.bck2brwsr) {
                 $scope.result('<h3>Loading the Virtual Machine</h3> Please wait...');
                 $timeout($scope.run, 100);
                 return;
             }
             $scope.vm = window.bck2brwsr(
-                'lib/emul-0.21-rt.js',
-                'lib/net.java.html-1.4.js',
-                'lib/net.java.html.boot-1.4.js',
-                'lib/net.java.html.json-1.4.js',
-                'lib/ko4j-1.4.js',
+                '0.3/vm/lib/emul-0.21-rt.js',
+                '0.3/vm/lib/net.java.html-1.4.js',
+                '0.3/vm/lib/net.java.html.boot-1.4.js',
+                '0.3/vm/lib/net.java.html.json-1.4.js',
+                '0.3/vm/lib/ko4j-1.4.js',
                 $scope.loadResourceFromClasses
             );
 
@@ -310,7 +310,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         localStorage.html = $scope.html;
         localStorage.java = $scope.java;
         localStorage.gistid = $scope.gistid;
-        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/save.html&state=" + $scope.gistid);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/0.3/save.html&state=" + $scope.gistid);
     };
 
     function fixJava(t) {
@@ -460,10 +460,10 @@ function DevCtrl( $scope, $timeout, $http ) {
     };
 
     if (typeof SharedWorker === 'undefined') {
-      var w = new Worker('privatecompiler.js', 'javac');
+      var w = new Worker('0.3/privatecompiler.js', 'javac');
       $scope.javac = w;
     } else {
-        var w = new SharedWorker('sharedcompiler.js', 'javac');
+        var w = new SharedWorker('0.3/sharedcompiler.js', 'javac');
         $scope.javac = w.port;
     }
 
