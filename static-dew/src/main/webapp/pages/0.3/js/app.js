@@ -229,10 +229,15 @@ function DevCtrl( $scope, $timeout, $http ) {
         }
         var vm = $scope.vm;
 
+        var attempts = 0;
         $scope.result("");
-        $timeout(function() {
-            $scope.result($scope.html);
-        }, 100).then(function() {
+        function initThreeTimes() {
+            if (attempts++ < 3) {
+                $timeout(initialize, 100);
+            }
+        }
+        
+        function initialize() {
             var first = null;
             for (var i = 0; i < $scope.classes.length; i++) {
                 var cn = $scope.classes[i].className;
@@ -270,10 +275,18 @@ function DevCtrl( $scope, $timeout, $http ) {
                     } catch (mainErr) {
                         $scope.status = 'Main method of ' + first + ' failed ' + mainErr;
                     }
+                } else {
+                    initThreeTimes();
                 }
             } catch (err) {
                 $scope.status = 'Error loading ' + first + ': ' + err.toString();
+                initThreeTimes();
             }
+        }
+        
+        $timeout(function() {
+            $scope.result($scope.html);
+            initThreeTimes();
         }, 100);
     };
 
