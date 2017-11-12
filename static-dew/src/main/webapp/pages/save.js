@@ -28,7 +28,8 @@ function updateGist(token, reply) {
       alert("Can't update gist, error: " + reply.error);
       return;
     }
-    if (!reply.gist || !reply.user) {
+    if (!reply.gist || !reply.user || !reply.gist.user) {
+      console.log(JSON.stringify(reply));
       return;
     }
 

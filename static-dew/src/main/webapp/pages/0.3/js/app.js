@@ -323,7 +323,7 @@ function DevCtrl( $scope, $timeout, $http ) {
         localStorage.html = $scope.html;
         localStorage.java = $scope.java;
         localStorage.gistid = $scope.gistid;
-        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/0.3/save.html&state=" + $scope.gistid);
+        window.open("https://github.com/login/oauth/authorize?client_id=13479cb2e9dd5f762848&scope=gist&redirect_uri=http://dew.apidesign.org/dew/save.html&state=" + $scope.gistid);
     };
 
     function fixJava(t) {
