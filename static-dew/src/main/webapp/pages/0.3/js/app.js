@@ -441,7 +441,11 @@ function DevCtrl( $scope, $timeout, $http ) {
                 samples.push(res[i]);
             }
             $scope.samples = samples;
-//            $scope.gistid = "";
+            if ($scope.gistid == -1) {
+                var s = Math.round(Math.random() * samples.length)
+                $scope.gistid = samples[s].id;
+                $scope.loadGist();
+            }
         };
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://api.github.com/users/jtulach/gists");
